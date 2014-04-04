@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BtPrint4</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_device_list">DeviceListActivity</string>
+    <string name="title_paired_devices">paired devices</string>
+    <string name="title_other_devices">other devices</string>
+    <string name="button_scan">scan...</string>
+    <string name="none_paired">none paired</string>
+    <string name="scanning">scanning...</string>
+    <string name="select_device">select device</string>
+    <string name="none_found">none found</string>
+    <string name="connect">connect...</string>
+    <string name="discoverable">discoverable</string>
+    <string name="bt_not_enabled_leaving">Bluetooth is disabled. Leaving.</string>
+    <string name="title_connected_to">connected to</string>
+    <string name="title_connecting">connecting</string>
+    <string name="title_not_connected">connected</string>
+    <string name="title_activity_activity_device_name">activity_device_name</string>
+
+</resources>
