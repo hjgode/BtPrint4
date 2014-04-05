@@ -154,8 +154,8 @@ public class BtPrint4 extends Activity {
 
     public void addLog(String s) {
         Log.d(TAG, s);
-//        mLog.append(s + "\n");
-//        mLog.refreshDrawableState();
+        mLog.append(s + "\r\n");
+        mLog.invalidate();
     }
 
     @Override
@@ -187,6 +187,7 @@ public class BtPrint4 extends Activity {
                 String message=btPrintService.printESCP();
                 byte[] buf=message.getBytes();
                 btPrintService.write(buf);
+                addLog("ESCP printed");
                 mLog.append("ESCP printed");
             }
         }
@@ -234,19 +235,25 @@ public class BtPrint4 extends Activity {
             super.handleMessage(msg);
             switch (msg.what) {
                 case msgTypes.MESSAGE_STATE_CHANGE:
-                    if (D) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                    if (D) Log.i(TAG, "handleMessage: MESSAGE_STATE_CHANGE: " + msg.arg1);
                     switch (msg.arg1) {
                         case btPrintFile.STATE_CONNECTED:
                             mTitle.setText(R.string.title_connected_to);
                             mTitle.append(mConnectedDeviceName);
                             mConversationArrayAdapter.clear();
+                            Log.i(TAG,"handleMessage: STATE_CONNECTED: "+mConnectedDeviceName);
                             break;
                         case btPrintFile.STATE_CONNECTING:
                             mTitle.setText(R.string.title_connecting);
+                            Log.i(TAG,"handleMessage: STATE_CONNECTING: "+mConnectedDeviceName);
                             break;
                         case btPrintFile.STATE_LISTEN:
+                            mTitle.setText(R.string.title_not_connected);
+                            Log.i(TAG,"handleMessage: STATE_LISTEN");
+                            break;
                         case btPrintFile.STATE_NONE:
                             mTitle.setText(R.string.title_not_connected);
+                            Log.i(TAG,"handleMessage: STATE_NONE: not connected");
                             break;
                     }
                     break;
@@ -267,19 +274,20 @@ public class BtPrint4 extends Activity {
                     mConnectedDeviceName = msg.getData().getString(msgTypes.DEVICE_NAME);
                     Toast.makeText(getApplicationContext(), "Connected to "
                             + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "handleMessage: CONNECTED TO: " + msg.getData().getString(msgTypes.DEVICE_NAME));
                     printESCP();
                     break;
                 case msgTypes.MESSAGE_TOAST:
                     Toast.makeText(getApplicationContext(), msg.getData().getString(msgTypes.TOAST),
                             Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "TOAST: " + msg.getData().getString(msgTypes.TOAST));
+                    Log.i(TAG, "handleMessage: TOAST: " + msg.getData().getString(msgTypes.TOAST));
                     addLog(msg.getData().getString(msgTypes.TOAST));
                     break;
                 case msgTypes.MESSAGE_INFO:
-                    //addLog(msg.getData().getString(msgTypes.INFO));
-                    mLog.append(msg.getData().getString(msgTypes.INFO));
-                    mLog.refreshDrawableState();
-                    Log.i(TAG,"INFO: "+  msg.getData().getString(msgTypes.INFO));
+                    addLog(msg.getData().getString(msgTypes.INFO));
+                    //mLog.append(msg.getData().getString(msgTypes.INFO));
+                    //mLog.refreshDrawableState();
+                    Log.i(TAG,"handleMessage: INFO: "+  msg.getData().getString(msgTypes.INFO));
                     break;
             }
         }
@@ -289,17 +297,17 @@ public class BtPrint4 extends Activity {
         if (D) Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE:
-                addLog("requestCode==REQUEST_CONNECT_DEVICE");
+                addLog("onActivityResult: requestCode==REQUEST_CONNECT_DEVICE");
                 // When DeviceListActivity returns with a device to connect
                 if (resultCode == Activity.RESULT_OK) {
                     addLog("resultCode==OK");
                     // Get the device MAC address
                     String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                    addLog("got device="+address);
+                    addLog("onActivityResult: got device="+address);
                     // Get the BLuetoothDevice object
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
                     // Attempt to connect to the device
-                    addLog("connecting service...");
+                    addLog("onActivityResult: connecting service...");
                     btPrintService.connect(device);
                 }
                 break;
@@ -307,13 +315,13 @@ public class BtPrint4 extends Activity {
                 addLog("requestCode==REQUEST_ENABLE_BT");
                 // When the request to enable Bluetooth returns
                 if (resultCode == Activity.RESULT_OK) {
-                    Log.i(TAG, "resultCode==OK");
+                    Log.i(TAG, "onActivityResult: resultCode==OK");
                     // Bluetooth is now enabled, so set up a chat session
-                    Log.i(TAG,"starting setupComm()...");
+                    Log.i(TAG,"onActivityResult: starting setupComm()...");
                     setupComm();
                 } else {
                     // User did not enable Bluetooth or an error occured
-                    Log.d(TAG, "BT not enabled");
+                    Log.d(TAG, "onActivityResult: BT not enabled");
                     Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
                     finish();
                 }

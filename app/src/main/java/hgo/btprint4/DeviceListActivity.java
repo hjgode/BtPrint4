@@ -191,7 +191,7 @@ public class DeviceListActivity extends Activity {
         }
     };
     public void addLog(String s) {
-        Log.d("btprint4:DeviceListActivity: ", s );
+        Log.d(TAG, s );
     }
 
 }
