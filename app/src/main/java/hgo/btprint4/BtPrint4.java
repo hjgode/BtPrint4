@@ -21,6 +21,8 @@ public class BtPrint4 extends Activity {
     btPrintFile btPrintService = null;
     // Layout Views
     private TextView mTitle;
+    private EditText mRemoteDevice;
+    Button mConnectButton;
     // Debugging
     private static final String TAG = "btprint";
     private static final boolean D = true;
@@ -57,6 +59,14 @@ public class BtPrint4 extends Activity {
 //        mTitle = (TextView) findViewById(R.id.title_right_text);
 
         mLog = (TextView) findViewById(R.id.log);
+        mRemoteDevice=(EditText)findViewById(R.id.remote_device);
+        mConnectButton=(Button)findViewById(R.id.buttonConnect);
+        mConnectButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                connectToDevice();
+            }
+        });
 
         addLog("btprint2 started");
 
@@ -165,13 +175,20 @@ public class BtPrint4 extends Activity {
         return true;
     }
 
+    boolean bDiscoveryStarted=false;
+    void startDiscovery(){
+        if(bDiscoveryStarted)
+            return;
+        bDiscoveryStarted=true;
+        // Launch the DeviceListActivity to see devices and do scan
+        Intent serverIntent = new Intent(this, DeviceListActivity.class);
+        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.scan:
-                // Launch the DeviceListActivity to see devices and do scan
-                Intent serverIntent = new Intent(this, DeviceListActivity.class);
-                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+                startDiscovery();
                 return true;
             case R.id.discoverable:
                 // Ensure this device is discoverable by others
@@ -188,13 +205,12 @@ public class BtPrint4 extends Activity {
                 byte[] buf=message.getBytes();
                 btPrintService.write(buf);
                 addLog("ESCP printed");
-                mLog.append("ESCP printed");
             }
         }
     }
     private void setupComm() {
         // Initialize the array adapter for the conversation thread
-        mConversationArrayAdapter = new ArrayAdapter<String>(this, R.id.message);
+        mConversationArrayAdapter = new ArrayAdapter<String>(this, R.id.remote_device);
         Log.d(TAG, "setupComm()");
         btPrintService=new btPrintFile(this,mHandler);
         if(btPrintService==null)
@@ -287,11 +303,38 @@ public class BtPrint4 extends Activity {
                     addLog(msg.getData().getString(msgTypes.INFO));
                     //mLog.append(msg.getData().getString(msgTypes.INFO));
                     //mLog.refreshDrawableState();
-                    Log.i(TAG,"handleMessage: INFO: "+  msg.getData().getString(msgTypes.INFO));
+                    String s=msg.getData().getString(msgTypes.INFO);
+                    if(s.length()==0)
+                        s=String.format("int: %i" + msg.getData().getInt(msgTypes.INFO));
+                    Log.i(TAG,"handleMessage: INFO: "+  s);
                     break;
             }
         }
     };
+
+    void connectToDevice(){
+        String remote=mRemoteDevice.getText().toString();
+        if(remote.length()==0)
+            return;
+        BluetoothDevice device=mBluetoothAdapter.getRemoteDevice(remote);
+        if(device!=null){
+            addLog("connecting to "+remote);
+            btPrintService.connect(device);
+        }
+        else{
+            addLog("unknown remote device!");
+        }
+    }
+
+    void connectToDevice(BluetoothDevice _device){
+        if(_device!=null){
+            addLog("connecting to "+ _device.getAddress());
+            btPrintService.connect(_device);
+        }
+        else{
+            addLog("unknown remote device!");
+        }
+    }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (D) Log.d(TAG, "onActivityResult " + resultCode);
@@ -306,10 +349,13 @@ public class BtPrint4 extends Activity {
                     addLog("onActivityResult: got device="+address);
                     // Get the BLuetoothDevice object
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+                    mRemoteDevice.setText(device.getAddress());
                     // Attempt to connect to the device
                     addLog("onActivityResult: connecting service...");
-                    btPrintService.connect(device);
+                    //btPrintService.connect(device);
+                    connectToDevice(device);
                 }
+                bDiscoveryStarted=false;
                 break;
             case REQUEST_ENABLE_BT:
                 addLog("requestCode==REQUEST_ENABLE_BT");

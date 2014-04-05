@@ -419,6 +419,7 @@ public class btPrintFile {
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }
+            addText("write done");
         }
 
         public void cancel() {
@@ -501,7 +502,7 @@ public class btPrintFile {
         // Send a failure message back to the Activity
         Message msg = mHandler.obtainMessage(msgTypes.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(msgTypes.TOAST, "Unable to connect device");
+        bundle.putString(msgTypes.TOAST, "Toast: connectionFailed");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
     }
@@ -509,7 +510,7 @@ public class btPrintFile {
     void addText(String s){
         Message msg = mHandler.obtainMessage(msgTypes.MESSAGE_INFO);
         Bundle bundle = new Bundle();
-        bundle.putString(msgTypes.INFO , "Unable to connect device");
+        bundle.putString(msgTypes.INFO , "INFO: " + s);
         msg.setData(bundle);
         mHandler.sendMessage(msg);
     }
