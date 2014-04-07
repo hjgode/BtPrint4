@@ -131,7 +131,7 @@ public class btPrintFile {
 //    public static final String DEVICE_NAME = "device_name";
 //    public static final String TOAST = "toast";
 
-    private final String msgState="STATE";
+//    private final String msgState="STATE";
 
 
     /**
@@ -152,6 +152,7 @@ public class btPrintFile {
 //        mHandler.sendMessage(msg);
         //mHandler.obtainMessage(BluetoothChat.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
+
 
     /**
      * This thread runs while listening for incoming connections. It behaves

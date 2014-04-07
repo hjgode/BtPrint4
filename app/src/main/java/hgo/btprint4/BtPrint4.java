@@ -27,6 +27,8 @@ public class BtPrint4 extends Activity {
     // Debugging
     private static final String TAG = "btprint";
     private static final boolean D = true;
+
+    ScrollView mScrollView;
     TextView mLog = null;
     Button mBtnExit = null;
     Button mBtnScan=null;
@@ -60,6 +62,7 @@ public class BtPrint4 extends Activity {
 //        mTitle.setText(R.string.app_name);
 //        mTitle = (TextView) findViewById(R.id.title_right_text);
 
+        mScrollView=(ScrollView)findViewById(R.id.ScrollView01);
         mLog = (TextView) findViewById(R.id.log);
         mRemoteDevice=(EditText)findViewById(R.id.remote_device);
 
@@ -103,6 +106,8 @@ public class BtPrint4 extends Activity {
             }
         });
         //setupComm();
+        //list files
+        AssetFiles assetFiles=new AssetFiles(this);
     }
 
     @Override
@@ -177,7 +182,8 @@ public class BtPrint4 extends Activity {
     public void addLog(String s) {
         Log.d(TAG, s);
         mLog.append(s + "\r\n");
-        mLog.invalidate();
+        mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
+        //mLog.invalidate();
     }
 
     @Override
@@ -257,7 +263,7 @@ public class BtPrint4 extends Activity {
         */
     }
 
-    // The Handler that gets information back from the BluetoothChatService
+    // The Handler that gets information back from the btPrintService
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -267,8 +273,7 @@ public class BtPrint4 extends Activity {
                     if (D) Log.i(TAG, "handleMessage: MESSAGE_STATE_CHANGE: " + msg.arg1);
                     switch (msg.arg1) {
                         case btPrintFile.STATE_CONNECTED:
-                            addLog("connected to: "+mConnectedDeviceName);
-                            mConnectButton.setText("Disconnect");
+                            addLog("connected to: " + mConnectedDeviceName);
                             mConversationArrayAdapter.clear();
                             Log.i(TAG,"handleMessage: STATE_CONNECTED: "+mConnectedDeviceName);
                             break;
@@ -283,7 +288,6 @@ public class BtPrint4 extends Activity {
                             break;
                         case btPrintFile.STATE_NONE:
                             addLog("not connected");
-                            mConnectButton.setText("Connect");
                             Log.i(TAG,"handleMessage: STATE_NONE: not connected");
                             break;
                     }

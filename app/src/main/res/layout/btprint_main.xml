@@ -13,20 +13,16 @@
     <ScrollView android:id="@+id/ScrollView01"
         android:layout_width="fill_parent"
         android:layout_height="160dp"
-        android:scrollbars="horizontal">
+        >
         <TextView
             android:textSize="14.0dip"
             android:textColor="#ff808080"
             android:id="@+id/log"
             android:background="#ff000000"
             android:layout_width="fill_parent"
-            android:layout_height="match_parent"
+            android:layout_height="fill_parent"
             android:text=""
-            android:gravity="top"
-            android:minLines="10"
-            android:maxHeight="150dp"
-            android:longClickable="false"
-            android:scrollHorizontally="true" />
+        />
     </ScrollView>
 
     <EditText
