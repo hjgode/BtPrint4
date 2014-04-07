@@ -2,16 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:weightSum="1">
 
     <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="eXit" />
     <ScrollView android:id="@+id/ScrollView01"
         android:layout_width="fill_parent"
-        android:layout_height="211dp">
+        android:layout_height="160dp"
+        android:scrollbars="horizontal">
         <TextView
             android:textSize="14.0dip"
             android:textColor="#ff808080"
@@ -21,7 +23,10 @@
             android:layout_height="match_parent"
             android:text=""
             android:gravity="top"
-            android:minLines="10" />
+            android:minLines="10"
+            android:maxHeight="150dp"
+            android:longClickable="false"
+            android:scrollHorizontally="true" />
     </ScrollView>
 
     <EditText
@@ -29,11 +34,20 @@
         android:layout_height="wrap_content"
         android:id="@+id/remote_device"
         android:text="00:1A:7D:DA:71:0A"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:layout_column="0" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="scan..."
+        android:id="@+id/button_scan"
+        android:layout_column="2" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Connect"
-        android:id="@+id/buttonConnect" />
+        android:id="@+id/buttonConnect"
+        android:layout_column="0" />
 </LinearLayout>

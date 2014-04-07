@@ -143,7 +143,7 @@ public class btPrintFile {
         if (D) Log.d(TAG, "setState() " + mState + " -> " + state);
         mState = state;
 
-        addText(msgTypes.state, state);
+        addText(msgTypes.STATE, state);
         // Give the new state to the Handler so the UI Activity can update
 //        Message msg = new Message();// mHandler.obtainMessage(_Activity.MESSAGE_DEVICE_NAME);
 //        Bundle bundle = new Bundle();
@@ -516,8 +516,31 @@ public class btPrintFile {
     }
     void addText(String msgType, int state){
         // Give the new state to the Handler so the UI Activity can update
-        Message msg = new Message();// mHandler.obtainMessage(_Activity.MESSAGE_DEVICE_NAME);
+        msgTypes type;
+        Message msg;
         Bundle bundle = new Bundle();
+        if(msgType.equals(msgTypes.STATE)){
+            msg = mHandler.obtainMessage(msgTypes.MESSAGE_STATE_CHANGE);// mHandler.obtainMessage(_Activity.MESSAGE_DEVICE_NAME);
+        }
+        else if(msgType.equals(msgTypes.DEVICE_NAME)){
+            msg = mHandler.obtainMessage(msgTypes.MESSAGE_DEVICE_NAME);
+        }
+        else if(msgType.equals(msgTypes.INFO)){
+            msg = mHandler.obtainMessage(msgTypes.MESSAGE_INFO);
+        }
+        else if(msgType.equals(msgTypes.TOAST)){
+            msg = mHandler.obtainMessage(msgTypes.MESSAGE_TOAST);
+        }
+        else if(msgType.equals(msgTypes.READ)){
+            msg = mHandler.obtainMessage(msgTypes.MESSAGE_READ);
+        }
+        else if(msgType.equals(msgTypes.WRITE)){
+            msg = mHandler.obtainMessage(msgTypes.MESSAGE_WRITE);
+        }
+        else {
+            msg = new Message();
+        }
+        //msg = mHandler.obtainMessage(msgTypes.MESSAGE_STATE_CHANGE);// mHandler.obtainMessage(_Activity.MESSAGE_DEVICE_NAME);
         bundle.putInt(msgType, state);
         msg.setData(bundle);
         mHandler.sendMessage(msg);

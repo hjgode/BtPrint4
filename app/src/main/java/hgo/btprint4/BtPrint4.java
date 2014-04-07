@@ -1,6 +1,7 @@
 package hgo.btprint4;
 
 import android.app.Activity;
+import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -20,7 +21,7 @@ import android.widget.*;
 public class BtPrint4 extends Activity {
     btPrintFile btPrintService = null;
     // Layout Views
-    private TextView mTitle;
+//    private TextView mTitle;
     private EditText mRemoteDevice;
     Button mConnectButton;
     // Debugging
@@ -28,6 +29,7 @@ public class BtPrint4 extends Activity {
     private static final boolean D = true;
     TextView mLog = null;
     Button mBtnExit = null;
+    Button mBtnScan=null;
 
     // Name of the connected device
     private String mConnectedDeviceName = null;
@@ -60,6 +62,8 @@ public class BtPrint4 extends Activity {
 
         mLog = (TextView) findViewById(R.id.log);
         mRemoteDevice=(EditText)findViewById(R.id.remote_device);
+
+        //connect button
         mConnectButton=(Button)findViewById(R.id.buttonConnect);
         mConnectButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -85,9 +89,17 @@ public class BtPrint4 extends Activity {
         mBtnExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                // TODO Auto-generated method stub
                 finish();
                 return;
+            }
+        });
+
+        //scan button
+        mBtnScan=(Button)findViewById(R.id.button_scan);
+        mBtnScan.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startDiscovery();
             }
         });
         //setupComm();
@@ -184,6 +196,7 @@ public class BtPrint4 extends Activity {
         Intent serverIntent = new Intent(this, DeviceListActivity.class);
         startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -254,21 +267,23 @@ public class BtPrint4 extends Activity {
                     if (D) Log.i(TAG, "handleMessage: MESSAGE_STATE_CHANGE: " + msg.arg1);
                     switch (msg.arg1) {
                         case btPrintFile.STATE_CONNECTED:
-                            mTitle.setText(R.string.title_connected_to);
-                            mTitle.append(mConnectedDeviceName);
+                            addLog("connected to: "+mConnectedDeviceName);
+                            mConnectButton.setText("Disconnect");
                             mConversationArrayAdapter.clear();
                             Log.i(TAG,"handleMessage: STATE_CONNECTED: "+mConnectedDeviceName);
                             break;
                         case btPrintFile.STATE_CONNECTING:
-                            mTitle.setText(R.string.title_connecting);
+                            addLog("connecting...");
                             Log.i(TAG,"handleMessage: STATE_CONNECTING: "+mConnectedDeviceName);
                             break;
                         case btPrintFile.STATE_LISTEN:
-                            mTitle.setText(R.string.title_not_connected);
+                            addLog("connection ready");
                             Log.i(TAG,"handleMessage: STATE_LISTEN");
+
                             break;
                         case btPrintFile.STATE_NONE:
-                            mTitle.setText(R.string.title_not_connected);
+                            addLog("not connected");
+                            mConnectButton.setText("Connect");
                             Log.i(TAG,"handleMessage: STATE_NONE: not connected");
                             break;
                     }
@@ -336,6 +351,7 @@ public class BtPrint4 extends Activity {
         }
     }
 
+    //handles the scan devices activity (dialog)
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (D) Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
