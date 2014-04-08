@@ -1,0 +1,44 @@
+! U1 JOURNAL 
+
+! U1 CENTER
+! U1 TEXT 1 0 10 0 Mindy's
+! U1 TEXT 1 0 10 35 Ice Cream Shop
+! U1 TEXT 5 0 10 85 901 29th Ave
+! U1 TEXT 5 0 10 105 Marion, IA 52302
+! U1 TEXT 5 0 10 125 (319) 555-CONE
+
+! U1 LEFT
+! U1 TEXT 5 0 10 160 July 04, 2014
+! U1 RIGHT
+! U1 TEXT 5 0 10 160 8:34 PM
+
+! U1 LEFT
+! U1 TEXT 5 0 10 190 Order Number: 
+! U1 RIGHT
+! U1 TEXT 5 0 10 190 38473
+
+! U1 LEFT
+! U1 TEXT 5 0 10 235 1 Pint Premuim Ice Cream
+! U1 RIGHT
+! U1 TEXT 5 0 10 250 $6.54
+
+! U1 LEFT
+! U1 TEXT 5 0 10 285 2 Half Gallon Light Ice Cream
+! U1 RIGHT
+! U1 TEXT 5 0 10 310 $8.89
+
+! U1 LEFT
+! U1 TEXT 5 0 10 335 4 Small Cone
+! U1 RIGHT
+! U1 TEXT 5 0 10 360 $4.00
+
+! U1 RIGHT
+! U1 TEXT 5 0 10 420 SUBTOTAL:   $19.43
+! U1 TEXT 5 0 10 455   TAX 7%:    $1.36 
+! U1 CENTER
+! U1 TEXT 5 2 10 500    TOTAL:   $20.79
+! U1 TEXT 1 0 10 580 Thank you 
+! U1 TEXT 1 0 10 610 for stopping!
+
+
+

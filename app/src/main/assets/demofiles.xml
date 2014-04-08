@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<files>
+	<section>
+		<short>"PrintESC2plistBT"</short>
+		<name>"Intermec (BT,ESCP,2inch) Product List Print</name>
+		<help>"Print 2inch list to an Intermec printer in ESCP</help>
+		<file>"escp2prodlist.prn"</file>
+	</section>
+	<section>
+		<short>"PrintESCP3fieldserviceBT"</short>
+		<name>"Intermec (BT,ESCP,3inch) Field Service Print</name>
+		<help>"Print 3inch field service to an Intermec printer in ESCP</help>
+		<file>"escp3fieldservice.prn"</file>
+	</section>
+	<section>
+		<short>"PrintESCP4plistBT"</short>
+		<name>"Intermec (BT,ESCP,4inch) Product List Print</name>
+		<help>"Print 4inch product list to an Intermec printer in ESCP</help>
+		<file>"escp4prodlist.prn"</file>
+	</section>
+	<section>
+		<short>"PrintFP2LabelBT"</short>
+		<name>"Intermec (BT,FP,2inch) Walmart Label Print</name>
+		<help>"Print 2inch walmart label to an Intermec printer in FP</help>
+		<file>"fp2walmartlabel.prn"</file>
+	</section>
+	<section>
+		<short>"PrintFP3LabelBT"</short>
+		<name>"Intermec (BT,FP,3inch) Walmart Label Print</name>
+		<help>"Print 3inch walmart label to an Intermec printer in FP</help>
+		<file>"fp3macklabel.prn"</file>
+	</section>
+	<section>
+		<short>"PrintFP4LabelBT"</short>
+		<name>"Intermec (BT,FP,4inch) Sears Label Print</name>
+		<help>"Print 4inch sears label to an Intermec printer in FP</help>
+		<file>"fp4searslabel.prn"</file>
+	</section>
+	<section>
+		<short>"PrintIPL2LabelBT"</short>
+		<name>"Intermec (BT,IPL,2inch) Label Print</name>
+		<help>"Print 2inch label to an Intermec printer in IPL</help>
+		<file>"ipl2label.prn"</file>
+	</section>
+	<section>
+		<short>"PrintIPL3LabelBT"</short>
+		<name>"Intermec (BT,IPL,3inch) UPS Next Day Label Print</name>
+		<help>"Print 3inch UPS Next Day label to an Intermec printer in IPL</help>
+		<file>"ipl3upsnextdaylabel.prn"</file>
+	</section>
+	<section>
+		<short>"PrintIPL4LabelBT"</short>
+		<name>"Intermec (BT,IPL,4inch) Sears Label Print</name>
+		<help>"Print 4inch Sears label to an Intermec printer in IPL</help>
+		<file>"ipl4upsearlylabel.prn"</file>
+	</section>
+	<section>
+		<short>"PrintCSIM2receiptBT"</short>
+		<name>"Intermec (BT,CSIM,2inch) Receipt Print</name>
+		<help>"Print 2inch Receipt to an Intermec printer in CSIM</help>
+		<file>"csim2receipt.prn"</file>
+	</section>
+	<section>
+		<short>"PrintCSIM3receiptBT"</short>
+		<name>"Intermec (BT,CSIM,3inch) Receipt Print</name>
+		<help>"Print 3inch Receipt to an Intermec printer in CSIM</help>
+		<file>"csim3receipt.prn"</file>
+	</section>
+	<section>
+		<short>"PrintXSIM2globalBT"</short>
+		<name>"Intermec (BT,XSIM,2inch) Global Enterprise Print</name>
+		<help>"Print 2inch Global Enterprise to an Intermec printer in XSIM</help>
+		<file>"xsim2global.prn"</file>
+	</section>
+	<section>
+		<short>"PrintXSIM3globalBT"</short>
+		<name>"Intermec (BT,XSIM,3inch) Global Enterprise Print</name>
+		<help>"Print 3inch Global Enterprise to an Intermec printer in XSIM</help>
+		<file>"xsim3global.prn"</file>
+	</section>
+</files>

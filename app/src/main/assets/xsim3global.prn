@@ -1,0 +1,24 @@
+P$PP
+BeginPage();
+SetMargin(0,0);
+SetPageSize(576,1248);
+DrawText(0,0,1,0,"==================================================");
+DrawText(10,30,1,0,"<w=2><f=3><h=1>  Global Enterprises");
+DrawText(10,70,1,0,"               Location: 7654321\n");
+DrawText(0,100,1,0,"==================================================");
+DrawText(10,130,1,0,"                Transaction Receipt");
+DrawText(10,160,1,0,"Transaction #:               4530902261009\n");
+DrawText(10,185,1,0,"Customer #:                  057-806-730\n");
+DrawText(10,210,1,0,"Date: 2/26/2009              Time: 12:08:43 PM\n");
+DrawText(10,230,1,0,"Driver: Jose\n");
+DrawText(10,300,1,0,"<f=2>Item          Quantity         Total\n");
+DrawText(10,330,1,0,"Chips            2 cases@10.00        20.00\n20 oz. cola      3 cases@5.00         5.00   \nChoc. Cookies    1 case@4.00          4.00 \n     ");
+DrawText(10,450,1,0,"<f=2>            Total           29.00 \n \n            Credit Card     29.00 \n<w=2>Paid\n");
+DrawBarcode(21,620,0,1,3,25,"4530902261009");
+DrawText(10,690,1,0,"<f=2>Credit Card #  XXXXXXXXXXXX1234 \nAuth Code:    40439Z  \nSignature ");
+DrawText(10,970,1,0,"<f=2>            Thank you for choosing\n              Global Enterprises\n         It's a pleasure to serve you.\n");
+DrawText(10,1060,1,0,"          Printed with the Intermec PR3 printer\n");
+DrawText(100,1090,1,0,"           www.Intermec.com\n");
+DrawRectangle(13,781,556,963,1,3);
+EndPage();
+P#
