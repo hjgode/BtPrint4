@@ -1,0 +1,107 @@
+package hgo.btprint4;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+
+public class FileListActivity extends Activity {
+    // Debugging
+    private static final String TAG = "FileListActivity";
+    private static final boolean D = true;
+
+    // Return Intent extra
+    public static String EXTRA_FILE_NAME = "selected_file";
+
+    // Member fields
+    private AssetFiles mAssetFiles;
+    ArrayAdapter<String> mFilesAdapter;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.file_list);
+        mAssetFiles=new AssetFiles(this);
+        // Set result CANCELED in case the user backs out
+        setResult(Activity.RESULT_CANCELED);
+
+        //bind TextView to string
+        mFilesAdapter=new ArrayAdapter<String>(this, R.layout.file_name);
+
+        // Find and set up the ListView for paired devices
+        ListView pairedListView = (ListView) findViewById(R.id.txtFileName);
+
+        pairedListView.setAdapter(mFilesAdapter);
+        pairedListView.setOnItemClickListener(mFileClickListener);
+        getFiles();
+        addLog("+++OnCreate+++ DONE");
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.file_list, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        addLog("+++OnDestroy+++");
+    }
+    // The on-click listener for all devices in the ListViews
+    private AdapterView.OnItemClickListener mFileClickListener = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+            addLog("OnItemClickListener()");
+
+            String info = ((TextView) v).getText().toString();
+
+            // Create the result Intent and include the file name
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_FILE_NAME, info);
+
+            addLog("setResult=OK");
+            // Set result and finish this Activity
+            setResult(Activity.RESULT_OK, intent);
+            finish();
+        }
+    };
+
+    void getFiles(){
+        // Indicate scanning in the title
+        setProgressBarIndeterminateVisibility(true);
+        setTitle("scanning...");
+        for(String s : mAssetFiles._files){
+            mFilesAdapter.add(s);
+        }
+        setProgressBarIndeterminateVisibility(false);
+        setTitle(R.string.select_file);
+    }
+
+    public void addLog(String s) {
+        Log.d(TAG, s);
+    }
+
+}

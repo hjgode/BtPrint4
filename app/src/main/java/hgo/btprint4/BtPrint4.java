@@ -33,6 +33,10 @@ public class BtPrint4 extends Activity {
     Button mBtnExit = null;
     Button mBtnScan=null;
 
+    Button mBtnSelectFile;
+    TextView mTxtFilename;
+    Button mBtnPrint;
+
     // Name of the connected device
     private String mConnectedDeviceName = null;
     // Array adapter for the conversation thread
@@ -42,14 +46,18 @@ public class BtPrint4 extends Activity {
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
 
+    // Intent request codes for files list
+    private static final int REQUEST_SELECT_FILE = 3;
+
     BluetoothAdapter mBluetoothAdapter = null;
+
+    View _view;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         //show
         super.onCreate(savedInstanceState);
         setContentView(R.layout.btprint_main);
-
 
         // CRASHES!
 //        // Set up the window layout
@@ -103,6 +111,30 @@ public class BtPrint4 extends Activity {
             @Override
             public void onClick(View view) {
                 startDiscovery();
+            }
+        });
+
+        mBtnSelectFile=(Button)findViewById(R.id.btnSelectFile);
+        mBtnSelectFile.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startFileList();
+            }
+        });
+
+        mTxtFilename=(TextView)findViewById(R.id.txtFileName);
+        mTxtFilename.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startFileList();
+            }
+        });
+
+        mBtnPrint=(Button)findViewById(R.id.btnPrintFile);
+        mBtnPrint.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                printFile();
             }
         });
         //setupComm();
@@ -169,6 +201,12 @@ public class BtPrint4 extends Activity {
         if (D) Log.e(TAG, "--- ON DESTROY ---");
     }
 
+    void printFile(){
+        if(mTxtFilename.length()>0){
+            //TODO: add code
+        }
+    }
+
     private void ensureDiscoverable() {
         if (D) Log.d(TAG, "ensure discoverable");
         if (mBluetoothAdapter.getScanMode() !=
@@ -203,15 +241,27 @@ public class BtPrint4 extends Activity {
         startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
     }
 
+    boolean bFileListStared=false;
+    void startFileList(){
+        if(bFileListStared)
+            return;
+        bFileListStared=true;
+        Intent fileListerIntent = new Intent(this, FileListActivity.class);
+        startActivityForResult(fileListerIntent, REQUEST_SELECT_FILE);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.scan:
+            case R.id.mnuScan:
                 startDiscovery();
                 return true;
-            case R.id.discoverable:
+            case R.id.mnuDiscoverable:
                 // Ensure this device is discoverable by others
                 ensureDiscoverable();
+                return true;
+            case R.id.mnuFilelist:
+                startFileList();
                 return true;
         }
         return false;
@@ -355,10 +405,27 @@ public class BtPrint4 extends Activity {
         }
     }
 
-    //handles the scan devices activity (dialog)
+
+    //handles the scan devices and file list activity (dialog)
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (D) Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
+            case REQUEST_SELECT_FILE:
+                addLog("onActivityResult: requestCode==REQUEST_SELECT_FILE");
+                // When DeviceListActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK) {
+                    addLog("resultCode==OK");
+                    // Get the device MAC address
+                    String file = data.getExtras().getString(FileListActivity.EXTRA_FILE_NAME);
+                    addLog("onActivityResult: got file="+file);
+                    PrintFile printFile=new PrintFile(file);
+                    addLog("printfile type is "+printFile._getPrintLanguage().toString());
+                    mTxtFilename.setText(file);
+                    //mRemoteDevice.setText(device.getAddress());
+                    // Attempt to connect to the device
+                }
+                bFileListStared=false;
+                break;
             case REQUEST_CONNECT_DEVICE:
                 addLog("onActivityResult: requestCode==REQUEST_CONNECT_DEVICE");
                 // When DeviceListActivity returns with a device to connect

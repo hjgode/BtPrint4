@@ -10,6 +10,17 @@ import java.io.IOException;
  */
 public class PrintFile {
     String sFileName;
+    ePrintLanguages pLang=ePrintLanguages.NAN;
+
+    public ePrintLanguages _getPrintLanguage(){
+        return this.pLang;
+    }
+
+    public PrintFile(String sFile){
+        sFileName=sFile;
+        PrintLanguage pL=new PrintLanguage(sFileName);
+        pLang=pL.printLanguage;
+    }
 
     public class PrintLanguage{
         String sShortName;// ie IPL or ESC or DPL

@@ -13,14 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/mnuScan"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="@string/connect" />
-    <item android:id="@+id/mnuDiscoverable"
-        android:icon="@android:drawable/ic_menu_mylocation"
-        android:title="@string/discoverable" />
-    <item android:id="@+id/mnuFilelist"
-        android:icon="@android:drawable/ic_menu_mylocation"
-        android:title="@string/filelistmenu" />
-</menu>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textSize="18sp"
+    android:padding="5dp"
+    />

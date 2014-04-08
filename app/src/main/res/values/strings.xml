@@ -19,5 +19,10 @@
     <string name="title_connecting">connecting</string>
     <string name="title_not_connected">connected</string>
     <string name="title_activity_activity_device_name">activity_device_name</string>
-
+    <string name="title_activity_file_list">Demo Files</string>
+    <string name="select_file">select file</string>
+    <string name="filelistmenu">demo files</string>
+    <string name="button_print_text">PRINT</string>
+    <string name="button_select_file_text">select demo</string>
+    <string name="button_connect_text">connect</string>
 </resources>
