@@ -18,6 +18,13 @@ import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.*;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+
 public class BtPrint4 extends Activity {
     btPrintFile btPrintService = null;
     // Layout Views
@@ -36,6 +43,8 @@ public class BtPrint4 extends Activity {
     Button mBtnSelectFile;
     TextView mTxtFilename;
     Button mBtnPrint;
+    PrintFileXML printFileXML=null;
+    ArrayList<PrintFileDetails> printFileDetailses;
 
     // Name of the connected device
     private String mConnectedDeviceName = null;
@@ -140,6 +149,9 @@ public class BtPrint4 extends Activity {
         //setupComm();
         //list files
         AssetFiles assetFiles=new AssetFiles(this);
+
+        //read file descriptions
+        readPrintFileDescriptions();
     }
 
     @Override
@@ -199,6 +211,25 @@ public class BtPrint4 extends Activity {
         // Stop the Bluetooth chat services
         if (btPrintService != null) btPrintService.stop();
         if (D) Log.e(TAG, "--- ON DESTROY ---");
+    }
+
+    void readPrintFileDescriptions(){
+        //TODO add code
+        InputStream inputStream=null;
+        try {
+            inputStream = this.getAssets().open("demofiles.xml");
+            printFileXML=new PrintFileXML(inputStream);
+            //now assign the array of known print files and there details
+            printFileDetailses=printFileXML.printFileDetails;
+        } catch (IOException e) {
+            Log.e(TAG, "Exception in readPrintFileDescriptions: " + e.getMessage());
+        }
+        if(inputStream!=null) {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+            }
+        }
     }
 
     void printFile(){
@@ -418,8 +449,12 @@ public class BtPrint4 extends Activity {
                     // Get the device MAC address
                     String file = data.getExtras().getString(FileListActivity.EXTRA_FILE_NAME);
                     addLog("onActivityResult: got file="+file);
-                    PrintFile printFile=new PrintFile(file);
-                    addLog("printfile type is "+printFile._getPrintLanguage().toString());
+                    if(printFileXML!=null) {
+                        PrintFileDetails details = printFileXML.getPrintFileDetails(file);
+                        addLog("printfile type is " + details.printLanguage +
+                                "description: " + details.description);
+                    }
+
                     mTxtFilename.setText(file);
                     //mRemoteDevice.setText(device.getAddress());
                     // Attempt to connect to the device
