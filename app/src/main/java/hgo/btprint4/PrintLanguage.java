@@ -59,8 +59,11 @@ public class PrintLanguage{
     public static Integer getPrintWidth(String sFileName){
         Integer iPrintWidth=2;
         char[] chars = sFileName.toCharArray();
+        int code=2;
+        try{
         for(int i=0; i<sFileName.length(); i++){
-            Integer code = sFileName.substring(i,1).codePointAt(0);
+            //Integer code = sFileName.substring(i,1).codePointAt(0);
+            code=chars[i];
             if(code>=48 && code<=57){   //numbers are from 48 to 57
                 try {
                     iPrintWidth = code-48;
@@ -69,6 +72,8 @@ public class PrintLanguage{
                     iPrintWidth=2;
                 }
             }
+        }}catch (Exception e){
+            Log.e(TAG, "Exception in getPrintWidth: "+e.getMessage());
         }
         return  iPrintWidth;
     }

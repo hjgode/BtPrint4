@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="1"
-    android:background="@android:color/darker_gray">
+    android:background="@android:color/darker_gray"
+        android:layout_alignParentBottom="true">
 
     <Button
         android:id="@+id/button1"
@@ -14,6 +19,8 @@
     <ScrollView android:id="@+id/ScrollView01"
         android:layout_width="fill_parent"
         android:layout_height="120dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
         >
         <TextView
             android:textSize="14.0dip"
@@ -30,16 +37,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/remote_device"
-        android:text="00:1A:7D:DA:71:0A"
         android:textAlignment="center"
         android:layout_column="0"
         android:background="@android:color/white"
-        android:textAppearance="@android:style/TextAppearance.Large" />
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:text="@string/toast_title"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        />
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingEnd="4dp"
+        android:paddingStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        >
 
         <Button
             android:layout_width="@dimen/button_width"
@@ -66,13 +83,18 @@
         android:text="tap [select demo]"
         android:id="@+id/txtFileName"
         android:maxLines="1"
-        android:background="@android:color/white" />
+        android:background="@android:color/white"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp" />
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="1">
+        android:weightSum="1"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        >
 
         <Button
             android:layout_width="@dimen/button_width"
@@ -91,4 +113,7 @@
             android:layout_gravity="right"
             android:layout_weight="0.5" />
     </LinearLayout>
+
+
 </LinearLayout>
+    </ScrollView>

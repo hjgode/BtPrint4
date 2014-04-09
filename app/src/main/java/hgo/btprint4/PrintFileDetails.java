@@ -30,4 +30,14 @@ public class PrintFileDetails {
         this.help="empty entry";
         this.shortname="do not use";
     }
+    @Override
+    public String toString(){
+        String s="unknown";
+        s=String.format("description: %s\nprint language: %s\nprint width: %s\nfile name: %s",
+                this.description,
+                this.printLanguage,
+                this.printerWidth,
+                this.filename);
+        return s;
+    }
 }

@@ -3,6 +3,7 @@ package hgo.btprint4;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.util.UUID;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -25,7 +26,7 @@ public class btPrintFile {
         mHandler=handler;
         //_btMAC=sBTmac;
         //_sFile=sFileName;
-        mState=STATE_NONE;
+        mState=STATE_IDLE;
         mAdapter=BluetoothAdapter.getDefaultAdapter();
         addText("btPrintFile initialized 1");
     }
@@ -39,7 +40,7 @@ public class btPrintFile {
         mHandler=handler;
         _btMAC=sBTmac;
         _sFile=sFileName;
-        mState=STATE_NONE;
+        mState=STATE_IDLE;
         mAdapter=BluetoothAdapter.getDefaultAdapter();
         addText("btPrintFile initialized 2");
     }
@@ -57,12 +58,7 @@ public class btPrintFile {
         // Cancel any thread currently running a connection
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
-        // Start the thread to listen on a BluetoothServerSocket
-        if (mAcceptThread == null) {
-            mAcceptThread = new AcceptThread();
-            mAcceptThread.start();
-        }
-        setState(STATE_LISTEN);
+        setState(STATE_IDLE);   //idle
         addText("start done.");
     }
 
@@ -74,8 +70,7 @@ public class btPrintFile {
         addText("stop()");
         if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
-        if (mAcceptThread != null) {mAcceptThread.cancel(); mAcceptThread = null;}
-        setState(STATE_NONE);
+        setState(STATE_DISCONNECTED);
         addText("stop() done.");
     }
 
@@ -108,17 +103,17 @@ public class btPrintFile {
     private Handler mHandler=null;
     private int mState;
 
-    private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
 
     private static final UUID UUID_SPP = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     // Constants that indicate the current connection state
-    public static final int STATE_NONE = 0;       // we're doing nothing
+    public static final int STATE_IDLE = 0;       // we're doing nothing
     public static final int STATE_LISTEN = 1;     // now listening for incoming connections
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
+    public static final int STATE_DISCONNECTED = 4;  // now connected to a remote device
 
     // Message types sent from the BluetoothChatService Handler
 //    public static final int MESSAGE_STATE_CHANGE = 1;
@@ -151,97 +146,6 @@ public class btPrintFile {
 //        msg.setData(bundle);
 //        mHandler.sendMessage(msg);
         //mHandler.obtainMessage(BluetoothChat.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
-    }
-
-
-    /**
-     * This thread runs while listening for incoming connections. It behaves
-     * like a server-side client. It runs until a connection is accepted
-     * (or until cancelled).
-     */
-    private class AcceptThread extends Thread {
-        // Name for the SDP record when creating server socket
-        private static final String NAME = "BluetoothPrintFile";
-        // The local server socket
-        private final BluetoothServerSocket mmServerSocket;
-
-        public AcceptThread() {
-            BluetoothServerSocket tmp = null;
-
-            // Create a new listening server socket
-            try {
-                tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME, UUID_SPP);
-            } catch (IOException e) {
-                Log.e(TAG, "listen() failed", e);
-            }
-            mmServerSocket = tmp;
-        }
-
-        public void run() {
-            if (D) Log.d(TAG, "BEGIN mAcceptThread" + this);
-            setName("AcceptThread");
-            BluetoothSocket socket = null;
-
-            // Listen to the server socket if we're not connected
-            while (mState != STATE_CONNECTED) {
-                try {
-                    // This is a blocking call and will only return on a
-                    // successful connection or an exception
-                    socket = mmServerSocket.accept();
-                } catch (IOException e) {
-                    Log.e(TAG, "accept() failed", e);
-                    break;
-                }
-
-                // If a connection was accepted
-                if (socket != null) {
-                    synchronized (btPrintFile.this) {
-                        switch (mState) {
-                            case STATE_LISTEN:
-                            case STATE_CONNECTING:
-                                // Situation normal. Start the connected thread.
-                                connected(socket, socket.getRemoteDevice());
-                                break;
-                            case STATE_NONE:
-                            case STATE_CONNECTED:
-                                // Either not ready or already connected. Terminate new socket.
-                                try {
-                                    socket.close();
-                                } catch (IOException e) {
-                                    Log.e(TAG, "Could not close unwanted socket", e);
-                                }
-                                break;
-                        }
-                    }
-                }
-            }
-            if (D) Log.i(TAG, "END mAcceptThread");
-        }
-
-        public void cancel() {
-            if (D) Log.d(TAG, "cancel " + this);
-            try {
-                mmServerSocket.close();
-            } catch (IOException e) {
-                Log.e(TAG, "close() of server failed", e);
-            }
-        }
-    }
-
-    /**
-     * print a file to a connected device
-     * @param sFile
-     */
-    public  synchronized void printFile(String sFile){
-        addText("starting print file...");
-        if(mState==STATE_CONNECTED){
-            //go on
-            log("printing file...");
-
-        }
-        else{
-            addText("printFile: NOT CONNECTED");
-        }
     }
 
     public String printESCP()
@@ -395,8 +299,7 @@ public class btPrintFile {
                     bytes = mmInStream.read(buffer);
 
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(msgTypes.MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget();
+                    mHandler.obtainMessage(msgTypes.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
@@ -446,9 +349,6 @@ public class btPrintFile {
         // Cancel any thread currently running a connection
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
-        // Cancel the accept thread because we only want to connect to one device
-        if (mAcceptThread != null) {mAcceptThread.cancel(); mAcceptThread = null;}
-
         // Start the thread to manage the connection and perform transmissions
         mConnectedThread = new ConnectedThread(socket);
         mConnectedThread.start();
@@ -467,7 +367,7 @@ public class btPrintFile {
      */
     private void connectionLost() {
         addText("connectionLost()");
-        setState(STATE_LISTEN);
+        setState(STATE_DISCONNECTED);
 
         // Send a failure message back to the Activity
         Message msg = mHandler.obtainMessage(msgTypes.MESSAGE_TOAST);
@@ -498,7 +398,7 @@ public class btPrintFile {
      */
     private void connectionFailed() {
         addText("connectionFailed()");
-        setState(STATE_LISTEN);
+        setState(STATE_DISCONNECTED);
 
         // Send a failure message back to the Activity
         Message msg = mHandler.obtainMessage(msgTypes.MESSAGE_TOAST);
@@ -542,9 +442,12 @@ public class btPrintFile {
             msg = new Message();
         }
         //msg = mHandler.obtainMessage(msgTypes.MESSAGE_STATE_CHANGE);// mHandler.obtainMessage(_Activity.MESSAGE_DEVICE_NAME);
+        //mHandler.obtainMessage(BluetoothChat.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
         bundle.putInt(msgType, state);
         msg.setData(bundle);
+        msg.arg1=state;             //we can use arg1 or the bundle to provide additional information to the message handler
         mHandler.sendMessage(msg);
+        Log.i(TAG, "addText: "+msgType+", state="+state);
     }
     void log(String msg){
         if(D) Log.d(TAG, msg);

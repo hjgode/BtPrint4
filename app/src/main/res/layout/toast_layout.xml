@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toast_layout_root"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@xml/rounded_rect"
+    android:layout_margin="25dip"
+    >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_margin="6dp">
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toast_title"
+        android:text="@string/toast_title"
+        android:textColor="#ffff00"
+        android:textStyle="bold"
+        android:textSize="22dp"
+        android:minWidth="100dp"
+        android:background="@android:color/background_dark"
+        android:gravity="center"
+        android:layout_margin="4dp" />
+
+    <LinearLayout
+        android:layout_margin="5dip"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView android:src="@drawable/cheese"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <TextView android:id="@+id/toast_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="6dp"
+                android:textSize="28dp"
+                android:minWidth="150dp"
+                android:text="Test Text"
+                android:textStyle="bold"
+                android:paddingRight="6dp"
+                android:textColor="#fff206" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

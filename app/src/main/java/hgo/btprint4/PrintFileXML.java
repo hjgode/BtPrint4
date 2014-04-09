@@ -18,9 +18,11 @@ import java.util.ArrayList;
  * Created by hgode on 08.04.2014.
  */
 public class PrintFileXML {
-    public ArrayList<PrintFileDetails> printFileDetails;
+    ArrayList<PrintFileDetails> printFileDetails;
     final String TAG="PrintFileXML";
-
+    public ArrayList<PrintFileDetails> getPrintFileDetails(){
+        return  printFileDetails;
+    }
     public PrintFileXML(InputStream in_s) {
         XmlPullParserFactory pullParserFactory;
         try {
@@ -45,46 +47,52 @@ public class PrintFileXML {
     }
 
     private ArrayList<PrintFileDetails> parseXML(XmlPullParser parser) throws XmlPullParserException, IOException {
-        ArrayList<PrintFileDetails> printfiles = null;
-        printfiles = new ArrayList<PrintFileDetails>();
-
+        printFileDetails=new ArrayList<PrintFileDetails>();
         int eventType = parser.getEventType();
         PrintFileDetails currentPrintFile = null;
-
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            String name = null;
-            switch (eventType) {
-                case XmlPullParser.START_DOCUMENT:
-//                    printfiles = new ArrayList();
-                    break;
-                case XmlPullParser.START_TAG:
-                    name = parser.getName();
-                    Log.i("XmlParser", "name='"+name+"'");
-                    if (name.equals("fileentry")) {
-                        currentPrintFile = new PrintFileDetails();
-                    } else if (currentPrintFile != null) {
-                        if (name.equals("shortname")) {
-                            currentPrintFile.shortname = parser.nextText();
-                        } else if (name.equals("decription")) {
-                            currentPrintFile.description = parser.nextText();
-                        } else if (name.equals("help")) {
-                            currentPrintFile.help = parser.nextText();
-                        } else if (name.equals("filename")) {
-                            currentPrintFile.filename = parser.nextText();
-                            currentPrintFile.printLanguage=PrintLanguage.getLanguage(currentPrintFile.filename);
-                            currentPrintFile.printerWidth=PrintLanguage.getPrintWidth(currentPrintFile.filename);
+        try {
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                String name = null;
+                switch (eventType) {
+                    case XmlPullParser.START_DOCUMENT:
+                        break;
+                    case XmlPullParser.START_TAG:
+                        name = parser.getName();
+                        Log.i("XmlParser", "START_TAG: name='" + name + "'");
+                        if (name.equals("fileentry")) {
+                            currentPrintFile = new PrintFileDetails();
+                            Log.i(TAG, "new fileentry");
+                        } else if (currentPrintFile != null) {
+                            if (name.equals("shortname")) {
+                                currentPrintFile.shortname = parser.nextText();
+                            } else if (name.equals("description")) {
+                                currentPrintFile.description = parser.nextText();
+                            } else if (name.equals("help")) {
+                                currentPrintFile.help = parser.nextText();
+                            } else if (name.equals("filename")) {
+                                currentPrintFile.filename = parser.nextText();
+                                currentPrintFile.printLanguage = PrintLanguage.getLanguage(currentPrintFile.filename);
+                                currentPrintFile.printerWidth = PrintLanguage.getPrintWidth(currentPrintFile.filename);
+                                Log.i(TAG, "filename ='"+currentPrintFile.filename+"'");
+                            }
                         }
-                    }
-                    break;
-                case XmlPullParser.END_TAG:
-                    name = parser.getName();
-                    if (name.equalsIgnoreCase("fileentry") && currentPrintFile != null) {
-                        printfiles.add(currentPrintFile);
-                    }
+                        break;
+                    case XmlPullParser.END_TAG:
+                        name = parser.getName();
+                        if (name.equalsIgnoreCase("fileentry") && currentPrintFile != null) {
+                            printFileDetails.add(currentPrintFile);
+                            Log.i(TAG, "fileentry END_TAG");
+                        }
+                }
+                eventType = parser.next();
             }
-            eventType = parser.next();
+        }catch(XmlPullParserException e){
+            Log.e(TAG, "XmlPullParserException: "+e.getMessage());
         }
-        return printfiles;
+        catch (Exception e){
+            Log.e(TAG, "Exception: "+e.getMessage());
+        }
+        return printFileDetails;
     }
 
     public PrintFileDetails getPrintFileDetails(String sFileName){

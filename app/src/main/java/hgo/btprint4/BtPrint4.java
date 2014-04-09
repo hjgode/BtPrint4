@@ -5,24 +5,32 @@ import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.*;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 public class BtPrint4 extends Activity {
@@ -38,12 +46,12 @@ public class BtPrint4 extends Activity {
     ScrollView mScrollView;
     TextView mLog = null;
     Button mBtnExit = null;
-    Button mBtnScan=null;
+    Button mBtnScan = null;
 
     Button mBtnSelectFile;
     TextView mTxtFilename;
     Button mBtnPrint;
-    PrintFileXML printFileXML=null;
+    PrintFileXML printFileXML = null;
     ArrayList<PrintFileDetails> printFileDetailses;
 
     // Name of the connected device
@@ -79,12 +87,13 @@ public class BtPrint4 extends Activity {
 //        mTitle.setText(R.string.app_name);
 //        mTitle = (TextView) findViewById(R.id.title_right_text);
 
-        mScrollView=(ScrollView)findViewById(R.id.ScrollView01);
+        mScrollView = (ScrollView) findViewById(R.id.ScrollView01);
         mLog = (TextView) findViewById(R.id.log);
-        mRemoteDevice=(EditText)findViewById(R.id.remote_device);
+        mRemoteDevice = (EditText) findViewById(R.id.remote_device);
+        mRemoteDevice.setText(R.string.bt_default_address);
 
         //connect button
-        mConnectButton=(Button)findViewById(R.id.buttonConnect);
+        mConnectButton = (Button) findViewById(R.id.buttonConnect);
         mConnectButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -115,7 +124,7 @@ public class BtPrint4 extends Activity {
         });
 
         //scan button
-        mBtnScan=(Button)findViewById(R.id.button_scan);
+        mBtnScan = (Button) findViewById(R.id.button_scan);
         mBtnScan.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -123,7 +132,7 @@ public class BtPrint4 extends Activity {
             }
         });
 
-        mBtnSelectFile=(Button)findViewById(R.id.btnSelectFile);
+        mBtnSelectFile = (Button) findViewById(R.id.btnSelectFile);
         mBtnSelectFile.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -131,7 +140,7 @@ public class BtPrint4 extends Activity {
             }
         });
 
-        mTxtFilename=(TextView)findViewById(R.id.txtFileName);
+        mTxtFilename = (TextView) findViewById(R.id.txtFileName);
         mTxtFilename.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -139,7 +148,7 @@ public class BtPrint4 extends Activity {
             }
         });
 
-        mBtnPrint=(Button)findViewById(R.id.btnPrintFile);
+        mBtnPrint = (Button) findViewById(R.id.btnPrintFile);
         mBtnPrint.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -148,11 +157,12 @@ public class BtPrint4 extends Activity {
         });
         //setupComm();
         //list files
-        AssetFiles assetFiles=new AssetFiles(this);
+        AssetFiles assetFiles = new AssetFiles(this);
 
         //read file descriptions
         readPrintFileDescriptions();
     }
+
 
     @Override
     public void onStart() {
@@ -167,7 +177,7 @@ public class BtPrint4 extends Activity {
                 startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
                 // Otherwise, setup the comm session
             } else {
-                if(btPrintService==null)
+                if (btPrintService == null)
                     setupComm();
                 addLog("starting print service...");//if (mChatService == null) setupChat();
             }
@@ -180,7 +190,7 @@ public class BtPrint4 extends Activity {
         if (D) Log.e(TAG, "+ ON RESUME +");
         addLog("onResume");
         /*
-		// Performing this check in onResume() covers the case in which BT was
+        // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
         if (mChatService != null) {
@@ -213,18 +223,17 @@ public class BtPrint4 extends Activity {
         if (D) Log.e(TAG, "--- ON DESTROY ---");
     }
 
-    void readPrintFileDescriptions(){
-        //TODO add code
-        InputStream inputStream=null;
+    void readPrintFileDescriptions() {
+        InputStream inputStream = null;
         try {
             inputStream = this.getAssets().open("demofiles.xml");
-            printFileXML=new PrintFileXML(inputStream);
+            printFileXML = new PrintFileXML(inputStream);
             //now assign the array of known print files and there details
-            printFileDetailses=printFileXML.printFileDetails;
+            printFileDetailses = printFileXML.printFileDetails;
         } catch (IOException e) {
             Log.e(TAG, "Exception in readPrintFileDescriptions: " + e.getMessage());
         }
-        if(inputStream!=null) {
+        if (inputStream != null) {
             try {
                 inputStream.close();
             } catch (IOException e) {
@@ -232,10 +241,92 @@ public class BtPrint4 extends Activity {
         }
     }
 
-    void printFile(){
-        if(mTxtFilename.length()>0){
-            //TODO: add code
+    byte[] escpQuery() {
+        byte[] buf;
+        String sBuf = "?{QST:HW}";
+        ByteBuffer buf2;
+        Charset charset = Charset.forName("UTF-8");
+        buf2 = charset.encode(sBuf);
+        buf2.put(0, (byte) 0x1B);
+        return buf2.array();
+    }
+
+    /**
+     * this will print a file to the printer
+     */
+    void printFile() {
+        String fileName = mTxtFilename.getText().toString();
+        if (!fileName.endsWith("prn")) {
+            myToast("Not a prn file!", "Error");
+            //TODO make this Toast work some time
+            //Toast.makeText(this, "not a prn file",Toast.LENGTH_LONG);
+            return; //does not match file pattern for a print file
         }
+        if (btPrintService.getState() != btPrintFile.STATE_CONNECTED) {
+            myToast("Please connect first!", "Error");
+            //TODO make this Toast work some time
+            //Toast.makeText(this, "please connect first",Toast.LENGTH_LONG);
+            return; //does not match file pattern for a print file
+        }
+        //do a query if escp
+        if (fileName.startsWith("escp")) {
+            byte[] bufQuery = escpQuery();
+            btPrintService.write(bufQuery);
+        }
+        if (mTxtFilename.length() > 0) {
+            //TODO: add code
+            InputStream inputStream = null;
+            ByteArrayInputStream byteArrayInputStream;
+            Integer totalWrite = 0;
+            StringBuffer sb = new StringBuffer();
+            try {
+                inputStream = this.getAssets().open(fileName);
+
+                byte[] buf = new byte[2048];
+                int readCount = 0;
+                do {
+                    readCount = inputStream.read(buf);
+                    if (readCount > 0) {
+                        totalWrite += readCount;
+                        byte[] bufOut = new byte[readCount];
+                        System.arraycopy(buf, 0, bufOut, 0, readCount);
+                        btPrintService.write(bufOut);
+                    }
+                } while (readCount > 0);
+                inputStream.close();
+                addLog(String.format("printed " + totalWrite.toString() + " bytes"));
+            } catch (IOException e) {
+                Log.e(TAG, "Exception in printFile: " + e.getMessage());
+                addLog("printing failed!");
+                //Toast.makeText(this, "printing failed!", Toast.LENGTH_LONG);
+                myToast("Printing failed","Error");
+            }
+        } else {
+            addLog("no demo file");
+            //Toast.makeText(this, "no demo file", Toast.LENGTH_LONG);
+            myToast("No demo file selected!","Error");
+        }
+    }
+
+    void myToast(String sInfo, String sTitle){
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_layout_root));
+        ((TextView) layout.findViewById(R.id.toast_text)).setText(sInfo);
+        ((TextView) layout.findViewById(R.id.toast_title)).setText(sTitle);
+        Toast toast = new Toast(getBaseContext());
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.setGravity(Gravity.CENTER,0,0);
+        toast.show();
+    }
+    void myToast(String sInfo){
+//        Message msg;
+//        Bundle bundle=new Bundle();
+//        msg = mHandler.obtainMessage(msgTypes.MESSAGE_TOAST);
+//        bundle.putString(msgTypes.TOAST, sInfo);
+//        msg.setData(bundle);
+//        mHandler.sendMessage(msg);
+        myToast(sInfo, "Information");
     }
 
     private void ensureDiscoverable() {
@@ -262,21 +353,23 @@ public class BtPrint4 extends Activity {
         return true;
     }
 
-    boolean bDiscoveryStarted=false;
-    void startDiscovery(){
-        if(bDiscoveryStarted)
+    boolean bDiscoveryStarted = false;
+
+    void startDiscovery() {
+        if (bDiscoveryStarted)
             return;
-        bDiscoveryStarted=true;
+        bDiscoveryStarted = true;
         // Launch the DeviceListActivity to see devices and do scan
         Intent serverIntent = new Intent(this, DeviceListActivity.class);
         startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
     }
 
-    boolean bFileListStared=false;
-    void startFileList(){
-        if(bFileListStared)
+    boolean bFileListStared = false;
+
+    void startFileList() {
+        if (bFileListStared)
             return;
-        bFileListStared=true;
+        bFileListStared = true;
         Intent fileListerIntent = new Intent(this, FileListActivity.class);
         startActivityForResult(fileListerIntent, REQUEST_SELECT_FILE);
     }
@@ -298,22 +391,23 @@ public class BtPrint4 extends Activity {
         return false;
     }
 
-    void printESCP(){
-        if(btPrintService!=null){
-            if(btPrintService.getState()==btPrintFile.STATE_CONNECTED){
-                String message=btPrintService.printESCP();
-                byte[] buf=message.getBytes();
+    void printESCP() {
+        if (btPrintService != null) {
+            if (btPrintService.getState() == btPrintFile.STATE_CONNECTED) {
+                String message = btPrintService.printESCP();
+                byte[] buf = message.getBytes();
                 btPrintService.write(buf);
                 addLog("ESCP printed");
             }
         }
     }
+
     private void setupComm() {
         // Initialize the array adapter for the conversation thread
         mConversationArrayAdapter = new ArrayAdapter<String>(this, R.id.remote_device);
         Log.d(TAG, "setupComm()");
-        btPrintService=new btPrintFile(this,mHandler);
-        if(btPrintService==null)
+        btPrintService = new btPrintFile(this, mHandler);
+        if (btPrintService == null)
             Log.e(TAG, "btPrintService init() failed");
 /*
         // Initialize the array adapter for the conversation thread
@@ -351,25 +445,32 @@ public class BtPrint4 extends Activity {
             super.handleMessage(msg);
             switch (msg.what) {
                 case msgTypes.MESSAGE_STATE_CHANGE:
-                    if (D) Log.i(TAG, "handleMessage: MESSAGE_STATE_CHANGE: " + msg.arg1);
+                    Bundle bundle = msg.getData();
+                    int status = bundle.getInt("state");
+                    if (D)
+                        Log.i(TAG, "handleMessage: MESSAGE_STATE_CHANGE: " + msg.arg1);  //arg1 was not used! by btPrintFile
+                    setConnectState(msg.arg1);
                     switch (msg.arg1) {
                         case btPrintFile.STATE_CONNECTED:
                             addLog("connected to: " + mConnectedDeviceName);
                             mConversationArrayAdapter.clear();
-                            Log.i(TAG,"handleMessage: STATE_CONNECTED: "+mConnectedDeviceName);
+                            Log.i(TAG, "handleMessage: STATE_CONNECTED: " + mConnectedDeviceName);
                             break;
                         case btPrintFile.STATE_CONNECTING:
                             addLog("connecting...");
-                            Log.i(TAG,"handleMessage: STATE_CONNECTING: "+mConnectedDeviceName);
+                            Log.i(TAG, "handleMessage: STATE_CONNECTING: " + mConnectedDeviceName);
                             break;
                         case btPrintFile.STATE_LISTEN:
                             addLog("connection ready");
-                            Log.i(TAG,"handleMessage: STATE_LISTEN");
-
+                            Log.i(TAG, "handleMessage: STATE_LISTEN");
                             break;
-                        case btPrintFile.STATE_NONE:
-                            addLog("not connected");
-                            Log.i(TAG,"handleMessage: STATE_NONE: not connected");
+                        case btPrintFile.STATE_IDLE:
+                            addLog("STATE_NONE");
+                            Log.i(TAG, "handleMessage: STATE_NONE: not connected");
+                            break;
+                        case btPrintFile.STATE_DISCONNECTED:
+                            addLog("disconnected");
+                            Log.i(TAG, "handleMessage: STATE_DISCONNECTED");
                             break;
                     }
                     break;
@@ -384,18 +485,22 @@ public class BtPrint4 extends Activity {
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                    addLog("recv>>>" + readMessage);
                     break;
                 case msgTypes.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
                     mConnectedDeviceName = msg.getData().getString(msgTypes.DEVICE_NAME);
-                    Toast.makeText(getApplicationContext(), "Connected to "
-                            + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "Connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                    myToast(mConnectedDeviceName, "Connected");
                     Log.i(TAG, "handleMessage: CONNECTED TO: " + msg.getData().getString(msgTypes.DEVICE_NAME));
-                    printESCP();
+                    //printESCP();
+                    mConnectButton.setText("Disconnect");
                     break;
                 case msgTypes.MESSAGE_TOAST:
-                    Toast.makeText(getApplicationContext(), msg.getData().getString(msgTypes.TOAST),
-                            Toast.LENGTH_SHORT).show();
+//                    Toast toast = Toast.makeText(getApplicationContext(), msg.getData().getString(msgTypes.TOAST), Toast.LENGTH_SHORT);//.show();
+//                    toast.setGravity(Gravity.CENTER,0,0);
+//                    toast.show();
+                    myToast(msg.getData().getString(msgTypes.TOAST));
                     Log.i(TAG, "handleMessage: TOAST: " + msg.getData().getString(msgTypes.TOAST));
                     addLog(msg.getData().getString(msgTypes.TOAST));
                     break;
@@ -403,35 +508,46 @@ public class BtPrint4 extends Activity {
                     addLog(msg.getData().getString(msgTypes.INFO));
                     //mLog.append(msg.getData().getString(msgTypes.INFO));
                     //mLog.refreshDrawableState();
-                    String s=msg.getData().getString(msgTypes.INFO);
-                    if(s.length()==0)
-                        s=String.format("int: %i" + msg.getData().getInt(msgTypes.INFO));
-                    Log.i(TAG,"handleMessage: INFO: "+  s);
+                    String s = msg.getData().getString(msgTypes.INFO);
+                    if (s.length() == 0)
+                        s = String.format("int: %i" + msg.getData().getInt(msgTypes.INFO));
+                    Log.i(TAG, "handleMessage: INFO: " + s);
                     break;
             }
         }
     };
 
-    void connectToDevice(){
-        String remote=mRemoteDevice.getText().toString();
-        if(remote.length()==0)
+    void connectToDevice() {
+        String remote = mRemoteDevice.getText().toString();
+        if (remote.length() == 0)
             return;
-        BluetoothDevice device=mBluetoothAdapter.getRemoteDevice(remote);
-        if(device!=null){
-            addLog("connecting to "+remote);
-            btPrintService.connect(device);
+        if (btPrintService.getState() == btPrintFile.STATE_CONNECTED) {
+            btPrintService.stop();
+            setConnectState(btPrintFile.STATE_DISCONNECTED);
+            return;
         }
-        else{
+
+        BluetoothDevice device;
+        try {
+            device = mBluetoothAdapter.getRemoteDevice(remote);
+        }catch (Exception e){
+            myToast("Invalid BT MAC address");
+            device=null;
+        }
+
+        if (device != null) {
+            addLog("connecting to " + remote);
+            btPrintService.connect(device);
+        } else {
             addLog("unknown remote device!");
         }
     }
 
-    void connectToDevice(BluetoothDevice _device){
-        if(_device!=null){
-            addLog("connecting to "+ _device.getAddress());
+    void connectToDevice(BluetoothDevice _device) {
+        if (_device != null) {
+            addLog("connecting to " + _device.getAddress());
             btPrintService.connect(_device);
-        }
-        else{
+        } else {
             addLog("unknown remote device!");
         }
     }
@@ -448,18 +564,19 @@ public class BtPrint4 extends Activity {
                     addLog("resultCode==OK");
                     // Get the device MAC address
                     String file = data.getExtras().getString(FileListActivity.EXTRA_FILE_NAME);
-                    addLog("onActivityResult: got file="+file);
-                    if(printFileXML!=null) {
+                    addLog("onActivityResult: got file=" + file);
+                    if (printFileXML != null) {
                         PrintFileDetails details = printFileXML.getPrintFileDetails(file);
-                        addLog("printfile type is " + details.printLanguage +
-                                "description: " + details.description);
+                        addLog("printfile is:\n" + details.toString());
+                        //Toast.makeText(this, "You selected:\n" + details.toString(), Toast.LENGTH_LONG);
+                        myToast("Demo File:\n"+details.toString());
                     }
 
                     mTxtFilename.setText(file);
                     //mRemoteDevice.setText(device.getAddress());
                     // Attempt to connect to the device
                 }
-                bFileListStared=false;
+                bFileListStared = false;
                 break;
             case REQUEST_CONNECT_DEVICE:
                 addLog("onActivityResult: requestCode==REQUEST_CONNECT_DEVICE");
@@ -468,16 +585,16 @@ public class BtPrint4 extends Activity {
                     addLog("resultCode==OK");
                     // Get the device MAC address
                     String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                    addLog("onActivityResult: got device="+address);
+                    addLog("onActivityResult: got device=" + address);
                     // Get the BLuetoothDevice object
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
                     mRemoteDevice.setText(device.getAddress());
                     // Attempt to connect to the device
-                    addLog("onActivityResult: connecting service...");
+                    addLog("onActivityResult: connecting device...");
                     //btPrintService.connect(device);
                     connectToDevice(device);
                 }
-                bDiscoveryStarted=false;
+                bDiscoveryStarted = false;
                 break;
             case REQUEST_ENABLE_BT:
                 addLog("requestCode==REQUEST_ENABLE_BT");
@@ -485,7 +602,7 @@ public class BtPrint4 extends Activity {
                 if (resultCode == Activity.RESULT_OK) {
                     Log.i(TAG, "onActivityResult: resultCode==OK");
                     // Bluetooth is now enabled, so set up a chat session
-                    Log.i(TAG,"onActivityResult: starting setupComm()...");
+                    Log.i(TAG, "onActivityResult: starting setupComm()...");
                     setupComm();
                 } else {
                     // User did not enable Bluetooth or an error occured
@@ -495,4 +612,27 @@ public class BtPrint4 extends Activity {
                 }
         }
     }
+
+    void setConnectState(Integer iState) {
+        switch (iState) {
+            case btPrintFile.STATE_CONNECTED:
+                mConnectButton.setText(R.string.button_disconnect_text);
+                break;
+            case btPrintFile.STATE_DISCONNECTED:
+                mConnectButton.setText(R.string.button_connect_text);
+                break;
+            case btPrintFile.STATE_CONNECTING:
+                addLog("connecting...");
+                break;
+            case btPrintFile.STATE_LISTEN:
+                addLog("listening...");
+                break;
+            case btPrintFile.STATE_IDLE:
+                addLog("state none");
+                break;
+            default:
+                addLog("unknown state var " + iState.toString());
+        }
+    }
+
 }
