@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    >
+    android:weightSum="1">
 
 
     <Button
@@ -43,6 +43,7 @@
             android:id="@+id/button_scan"
             android:minWidth="180dp"
             android:layout_weight="0.5"
+            android:drawableLeft="@drawable/radar"
             />
 
         <Button
@@ -92,7 +93,7 @@
             android:minWidth="180dp"
             android:layout_gravity="right"
             android:layout_weight="0.5"
-
+            android:drawableLeft="@drawable/pb42"
             />
     </LinearLayout>
 
@@ -108,4 +109,12 @@
         android:maxHeight="100dp"
         />
 
- </LinearLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="64dp"
+        android:id="@+id/imageView"
+        android:scaleType="fitCenter"
+        android:src="@drawable/intermec"
+        />
+
+</LinearLayout>
