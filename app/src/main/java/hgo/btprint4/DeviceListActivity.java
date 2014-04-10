@@ -41,6 +41,10 @@ public class DeviceListActivity extends Activity {
     private ArrayAdapter<String> mPairedDevicesArrayAdapter;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
 
+    Button scanButton;
+    String scanButtonTextScan="Scan";
+    String scanButtonTextStop="STOP";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,15 +55,6 @@ public class DeviceListActivity extends Activity {
 
         // Set result CANCELED incase the user backs out
         setResult(Activity.RESULT_CANCELED);
-
-        // Initialize the button to perform device discovery
-        Button scanButton = (Button) findViewById(R.id.button_scan);
-        scanButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                doDiscovery();
-                v.setVisibility(View.GONE);
-            }
-        });
 
         // Initialize array adapters. One for already paired devices and
         // one for newly discovered devices
@@ -87,19 +82,21 @@ public class DeviceListActivity extends Activity {
         // Get the local Bluetooth adapter
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        // Get a set of currently paired devices
-        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
+        initDeviceList();
 
-        // If there are paired devices, add each one to the ArrayAdapter
-        if (pairedDevices.size() > 0) {
-            findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
-            for (BluetoothDevice device : pairedDevices) {
-                mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+        // Initialize the button to perform device discovery
+        scanButtonTextScan=getResources().getString(R.string.devicelist_action_button_text_scan);
+        scanButtonTextStop=getResources().getString(R.string.devicelist_action_button_text_cancel);
+        scanButton = (Button) findViewById(R.id.button_scan);
+        scanButton.setText(scanButtonTextScan);
+        scanButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                doDiscovery();
+                //v.setVisibility(View.GONE);
             }
-        } else {
-            String noDevices = getResources().getText(R.string.none_paired).toString();
-            mPairedDevicesArrayAdapter.add(noDevices);
-        }
+        });
+
+
         addLog("+++OnCreate+++ DONE");
     }
 
@@ -117,12 +114,44 @@ public class DeviceListActivity extends Activity {
         this.unregisterReceiver(mReceiver);
     }
 
+    void initDeviceList(){
+        //empty list first?
+        if(mPairedDevicesArrayAdapter.getCount()>0)
+            mPairedDevicesArrayAdapter.clear();
+        if(mNewDevicesArrayAdapter.getCount()>0)
+            mNewDevicesArrayAdapter.clear();
+
+        // Get a set of currently paired devices
+        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
+
+        // If there are paired devices, add each one to the ArrayAdapter
+        if (pairedDevices.size() > 0) {
+            findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
+            for (BluetoothDevice device : pairedDevices) {
+                mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+            }
+        } else {
+            String noDevices = getResources().getText(R.string.none_paired).toString();
+            mPairedDevicesArrayAdapter.add(noDevices);
+        }
+    }
     /**
      * Start device discover with the BluetoothAdapter
      */
     private void doDiscovery() {
         addLog("doDiscovery()");
+        initDeviceList();
 
+        if(scanButton.getText().toString().equals(scanButtonTextStop)){
+            if(mBtAdapter!=null){
+                if(mBtAdapter.isDiscovering()){
+                    addLog("stop discovery requested");
+                    mBtAdapter.cancelDiscovery();
+                    scanButton.setText(scanButtonTextScan);
+                    return;
+                }
+            }
+        }
         // Indicate scanning in the title
         setProgressBarIndeterminateVisibility(true);
         setTitle(R.string.scanning);
@@ -137,6 +166,7 @@ public class DeviceListActivity extends Activity {
 
         // Request discover from BluetoothAdapter
         mBtAdapter.startDiscovery();
+        scanButton.setText("STOP");
         addLog("Discovery() started");
     }
 
@@ -172,6 +202,7 @@ public class DeviceListActivity extends Activity {
 
             // When discovery finds a device
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                addLog("ACTION_FOUND");
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // If it's already paired, skip it, because it's been listed already
@@ -187,6 +218,7 @@ public class DeviceListActivity extends Activity {
                     String noDevices = getResources().getText(R.string.none_found).toString();
                     mNewDevicesArrayAdapter.add(noDevices);
                 }
+                scanButton.setText(scanButtonTextScan);
             }
         }
     };

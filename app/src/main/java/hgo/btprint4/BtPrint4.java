@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.View.OnClickListener;
+import android.webkit.WebSettings;
 import android.widget.*;
 
 import java.io.BufferedInputStream;
@@ -43,7 +45,6 @@ public class BtPrint4 extends Activity {
     private static final String TAG = "btprint";
     private static final boolean D = true;
 
-    ScrollView mScrollView;
     TextView mLog = null;
     Button mBtnExit = null;
     Button mBtnScan = null;
@@ -87,8 +88,9 @@ public class BtPrint4 extends Activity {
 //        mTitle.setText(R.string.app_name);
 //        mTitle = (TextView) findViewById(R.id.title_right_text);
 
-        mScrollView = (ScrollView) findViewById(R.id.ScrollView01);
         mLog = (TextView) findViewById(R.id.log);
+        mLog.setMovementMethod(ScrollingMovementMethod.getInstance());
+
         mRemoteDevice = (EditText) findViewById(R.id.remote_device);
         mRemoteDevice.setText(R.string.bt_default_address);
 
@@ -311,7 +313,14 @@ public class BtPrint4 extends Activity {
     void myToast(String sInfo, String sTitle){
         LayoutInflater inflater = getLayoutInflater();
         View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_layout_root));
+
         ((TextView) layout.findViewById(R.id.toast_text)).setText(sInfo);
+        TextView txt = (TextView)layout.findViewById(R.id.toast_text);
+        if(sInfo.length()>10) {
+            float textSize=txt.getTextSize(); //size in pixels
+            textSize=textSize/2;
+            txt.setTextSize(textSize);
+        }
         ((TextView) layout.findViewById(R.id.toast_title)).setText(sTitle);
         Toast toast = new Toast(getBaseContext());
         toast.setDuration(Toast.LENGTH_SHORT);
@@ -342,8 +351,22 @@ public class BtPrint4 extends Activity {
     public void addLog(String s) {
         Log.d(TAG, s);
         mLog.append(s + "\r\n");
-        mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
-        //mLog.invalidate();
+        // [http://stackoverflow.com/questions/3506696/auto-scrolling-textview-in-android-to-bring-text-into-view]
+        // find the amount we need to scroll.  This works by
+        // asking the TextView's internal layout for the position
+        // of the final line and then subtracting the TextView's height
+        int scrollAmount=0;
+        try {
+            scrollAmount = mLog.getLayout().getLineTop(mLog.getLineCount()) - mLog.getHeight();
+        }catch(NullPointerException e){
+            scrollAmount=0;
+        }
+        // if there is no need to scroll, scrollAmount will be <=0
+        if (scrollAmount > 0)
+            mLog.scrollTo(0, scrollAmount);
+        else
+            mLog.scrollTo(0, 0);
+
     }
 
     @Override

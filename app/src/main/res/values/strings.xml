@@ -28,4 +28,6 @@
     <string name="button_disconnect_text">disconnect</string>
     <string name="toast_title">Information</string>
     <string name="bt_default_address">00:A0:96:11:93:DC</string>
+    <string name="devicelist_action_button_text_scan">Scan</string>
+    <string name="devicelist_action_button_text_cancel">STOP</string>
 </resources>
