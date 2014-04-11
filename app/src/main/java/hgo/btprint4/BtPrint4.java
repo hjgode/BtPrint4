@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -260,13 +261,11 @@ public class BtPrint4 extends Activity {
         String fileName = mTxtFilename.getText().toString();
         if (!fileName.endsWith("prn")) {
             myToast("Not a prn file!", "Error");
-            //TODO make this Toast work some time
-            //Toast.makeText(this, "not a prn file",Toast.LENGTH_LONG);
             return; //does not match file pattern for a print file
         }
         if (btPrintService.getState() != btPrintFile.STATE_CONNECTED) {
             myToast("Please connect first!", "Error");
-            //TODO make this Toast work some time
+            //PROBLEM: this Toast does not work!
             //Toast.makeText(this, "please connect first",Toast.LENGTH_LONG);
             return; //does not match file pattern for a print file
         }
@@ -313,6 +312,20 @@ public class BtPrint4 extends Activity {
     void myToast(String sInfo, String sTitle){
         LayoutInflater inflater = getLayoutInflater();
         View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_layout_root));
+
+        //assign a better icon
+        try {
+            ImageView imageView = (ImageView) layout.findViewById(R.id.toast_image);
+            Resources resources = getResources();
+
+            if (sTitle.startsWith("Error"))
+                imageView.setImageDrawable(resources.getDrawable(R.drawable.exclamation));
+            else
+                imageView.setImageDrawable(resources.getDrawable(R.drawable.information));
+
+        }catch(Exception e){
+            Log.e(TAG, "can not assign toast image: "+ e.getMessage());
+        }
 
         ((TextView) layout.findViewById(R.id.toast_text)).setText(sInfo);
         TextView txt = (TextView)layout.findViewById(R.id.toast_text);
@@ -517,7 +530,8 @@ public class BtPrint4 extends Activity {
                     myToast(mConnectedDeviceName, "Connected");
                     Log.i(TAG, "handleMessage: CONNECTED TO: " + msg.getData().getString(msgTypes.DEVICE_NAME));
                     //printESCP();
-                    mConnectButton.setText("Disconnect");
+                    updateConnectButton(false);
+
                     break;
                 case msgTypes.MESSAGE_TOAST:
 //                    Toast toast = Toast.makeText(getApplicationContext(), msg.getData().getString(msgTypes.TOAST), Toast.LENGTH_SHORT);//.show();
@@ -550,16 +564,31 @@ public class BtPrint4 extends Activity {
             return;
         }
 
+        //Todo: format BT mac address
+
+        String newRemote = remote;
+/*
+        //BT address is either 12 hex chars or
+        //6 pairs of hex chars with colons in between
+        if(remote.length()==12){
+            //insert colons
+            newRemote=  remote.substring(0,2) + ":" + remote.substring(2,2) + ":" + remote.substring(4,2) + ":" +
+                        remote.substring(6,2) + ":" + remote.substring(8,2) + ":" +remote.substring(10,2);
+
+        }
+        else
+            newRemote=remote;
+*/
         BluetoothDevice device;
         try {
-            device = mBluetoothAdapter.getRemoteDevice(remote);
+            device = mBluetoothAdapter.getRemoteDevice(newRemote);
         }catch (Exception e){
             myToast("Invalid BT MAC address");
             device=null;
         }
 
         if (device != null) {
-            addLog("connecting to " + remote);
+            addLog("connecting to " + newRemote);
             btPrintService.connect(device);
         } else {
             addLog("unknown remote device!");
@@ -639,10 +668,10 @@ public class BtPrint4 extends Activity {
     void setConnectState(Integer iState) {
         switch (iState) {
             case btPrintFile.STATE_CONNECTED:
-                mConnectButton.setText(R.string.button_disconnect_text);
+                updateConnectButton(true);
                 break;
             case btPrintFile.STATE_DISCONNECTED:
-                mConnectButton.setText(R.string.button_connect_text);
+                updateConnectButton(false);
                 break;
             case btPrintFile.STATE_CONNECTING:
                 addLog("connecting...");
@@ -657,5 +686,17 @@ public class BtPrint4 extends Activity {
                 addLog("unknown state var " + iState.toString());
         }
     }
+
+    void updateConnectButton(boolean bConnected){
+        if(bConnected) {
+            mConnectButton.setText(R.string.button_disconnect_text);
+            mConnectButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.disconnectme, 0, 0, 0);
+        }
+        else{
+            mConnectButton.setText(R.string.button_connect_text);
+            mConnectButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.connectme, 0,0,0);
+        }
+    }
+
 
 }
