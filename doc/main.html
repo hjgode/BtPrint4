@@ -1,0 +1,190 @@
+<html>
+<body>
+
+<h1>BtPrint4</h1>
+A Bluetooth Label printer demo
+
+This is my first Android project and I had to learn how to get an Android activity working. I am a Windows Mobile C# developer and had to learn that you have to do many handwritten code in compare to what Visual Studio for SmartDevice development does automatically.
+
+An Android activity consists of many, many files with references to each other. Fortunately an IDE helps you creating and finding all the files and references.
+
+I started with Eclipse and ADT but went over to use Android Studio. Eclipse showed very strange behaving when designing the GUI of my activities.
+
+<h2>functions</h2>
+
+To print to a bluetooth printer we need several functions:
+
+A reference to the printer, the BT MAC address
+
+A socket to communicate with the printer
+
+A set of demo data
+
+<h2>Make the activity more user friendly</h2>
+
+provide a list of Bluetooth devices nearby to be used as target
+
+move the communication part to a background thread
+
+a list with demo data
+
+<h2>implementation</h2>
+The UI has an EditText holding the BT MAC address and a TextView to hold the demo data reference. Buttons for BT discovery, Connect/Disconnect, Demo select and a Print button. There are two list activities (separate windows or forms): the BT device list and a demo data list. The BT MAC address is filled either manually or by selecting a BT device from the list.
+
+I always try to keep code re-useable and so I implemented some helper classes. 
+
+<h3>demo data</h3>
+As BtPrint4 should provide a flexible set of demo data, this data is hold in separate files. I can add new demo data files by simply putting them in the assets dir of the project. To show the user better details about a demo file, I use a xml file with the description of each file.</br>
+The supported label and receipt printers use different print languages to print: ESC/P, IPL (Intermec Printer Language), ZSIM (a Zebra Simulation), CSIM, FP (Intermec Fingerprint) and others.</br>
+Further the data send to the label/receipt printer should match the width of the print media. There are printers with 2, 3, 4 and 5 inch media.<br>
+To manage all these different supported print languages and media sizes the file names I use reflect the target printer/media. The xml file with the descriptions provides more details about the demo files for the user.
+
+<h3>getting started</h3>
+Fortunately I did not have to start everything from scratch and found the Andorid SDK sample project BluetoothChat. It already comes with a BT device list and a background thread handling the communication. So, many thanks to Google to provide this sample.
+
+<h3>thread and GUI communication</h3>
+The background thread has to communicate to the main activity to announce state changes. And I need a function to write the demo data to the Bluetooth socket inside the thread. This was already implemented in the BluetoothChat thread code.</br>
+Within Compact Framework I can have several threads and have different handlers (delegates and events) for each thread.<br>
+On Android you only have one BroadcastReceiver that will handle all communication with different threads. Similar to WndProc (the main window message handler) on a windows system. AFAIK on Android you can also use Callbacks, but this will couple your thread code with the GUI. But message handling is asynchronous and so de-coupled. It may be a challenge to handle many different background threads within only one message handler. You have to provide identifiers for all possible sources of messages from background threads and the handler function in your main activity gets longer and longer. Not that nice.<br>
+
+<h4>states</h4>
+The background thread sends its state to the main activity. So we know if has a connection to the BT device (printer). The thread will also send received data to the activity. To provide the received data a so called bundle is used. The states are using a bundle (al list of keys and values) and a simple arg of the message to provide state changes to the main code.
+
+The main activity message handler:
+<pre>
+    ...
+    // The Handler that gets information back from the btPrintService
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case msgTypes.MESSAGE_STATE_CHANGE:
+                    Bundle bundle = msg.getData();
+                    int status = bundle.getInt("state");
+                    if (D)
+                        Log.i(TAG, "handleMessage: MESSAGE_STATE_CHANGE: " + msg.arg1);  //arg1 was not used! by btPrintFile
+                    setConnectState(msg.arg1);
+                    switch (msg.arg1) {
+                        case btPrintFile.STATE_CONNECTED:
+                            addLog("connected to: " + mConnectedDeviceName);
+                            mConversationArrayAdapter.clear();
+                            Log.i(TAG, "handleMessage: STATE_CONNECTED: " + mConnectedDeviceName);
+                            break;
+                            ...
+</pre>
+
+The thread sending state changes in a message:
+<pre>
+    ...
+        void addText(String msgType, int state){
+            // Give the new state to the Handler so the UI Activity can update
+            msgTypes type;
+            Message msg;
+            Bundle bundle = new Bundle();
+            if(msgType.equals(msgTypes.STATE)){
+                msg = mHandler.obtainMessage(msgTypes.MESSAGE_STATE_CHANGE);// mHandler.obtainMessage(_Activity.MESSAGE_DEVICE_NAME);
+            }
+            else if(msgType.equals(msgTypes.DEVICE_NAME)){
+                msg = mHandler.obtainMessage(msgTypes.MESSAGE_DEVICE_NAME);
+            }
+            ...
+            bundle.putInt(msgType, state);
+            msg.setData(bundle);
+            msg.arg1=state;             //we can use arg1 or the bundle to provide additional information to the message handler
+            mHandler.sendMessage(msg);
+            Log.i(TAG, "addText: "+msgType+", state="+state);
+        }
+        ...
+</pre>
+
+And the thread sending received data as a message:
+<pre>
+            // Keep listening to the InputStream while connected
+            while (true) {
+                try {
+                    // Read from the InputStream
+                    bytes = mmInStream.read(buffer);
+
+                    // Send the obtained bytes to the UI Activity
+                    mHandler.obtainMessage(msgTypes.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                } catch (IOException e) {
+                    Log.e(TAG, "disconnected", e);
+                    connectionLost();
+                    break;
+                }
+            }
+</pre>
+
+<h4>select a Bluetooth device</h4>
+
+<h4>connect to device</h4>
+
+<h4>select a demo file</h4>
+
+<h4>printing is sending binary data</h4>
+The demo data is within asset files. To write it to the printer (a Bluetooth socket) we need to obtain the bytes fo the file. We need to ensure the data is not changed and the data is send as is.
+
+[1] mTxtFilename holds the name of the file the user has selected<br>
+[2] ensure we are connected<br>
+[3] we can also query the printer status asyncronously<br>
+[4] read the data as is means read it as ByteArrayInputStream<br>
+[5] open the stream using an asset file<br>
+[6] read and write the data in chunks<br>
+
+<pre>
+    void printFile() {
+        String fileName = mTxtFilename.getText().toString(); //[1]
+        if (!fileName.endsWith("prn")) {
+            myToast("Not a prn file!", "Error");
+            return; //does not match file pattern for a print file
+        }
+        if (btPrintService.getState() != btPrintFile.STATE_CONNECTED) { //[2]
+            myToast("Please connect first!", "Error");
+            //PROBLEM: this Toast does not work!
+            //Toast.makeText(this, "please connect first",Toast.LENGTH_LONG);
+            return; //does not match file pattern for a print file
+        }
+        //do a query if escp
+        if (fileName.startsWith("escp")) { //[3]
+            byte[] bufQuery = escpQuery();
+            btPrintService.write(bufQuery);
+        }
+        if (mTxtFilename.length() > 0) {
+            //TODO: add code
+            InputStream inputStream = null;
+            ByteArrayInputStream byteArrayInputStream; //[4]
+            Integer totalWrite = 0;
+            StringBuffer sb = new StringBuffer();
+            try {
+                inputStream = this.getAssets().open(fileName);  //[5]
+
+                byte[] buf = new byte[2048];
+                int readCount = 0;
+                do {
+                    readCount = inputStream.read(buf);
+                    if (readCount > 0) {
+                        totalWrite += readCount;
+                        byte[] bufOut = new byte[readCount];
+                        System.arraycopy(buf, 0, bufOut, 0, readCount);
+                        btPrintService.write(bufOut);
+                    }
+                } while (readCount > 0); //[6]
+                inputStream.close();
+                addLog(String.format("printed " + totalWrite.toString() + " bytes"));
+            } catch (IOException e) {
+                Log.e(TAG, "Exception in printFile: " + e.getMessage());
+                addLog("printing failed!");
+                //Toast.makeText(this, "printing failed!", Toast.LENGTH_LONG);
+                myToast("Printing failed","Error");
+            }
+        } else {
+            addLog("no demo file");
+            //Toast.makeText(this, "no demo file", Toast.LENGTH_LONG);
+            myToast("No demo file selected!","Error");
+        }
+    }
+</pre>
+
+</body>
+</html>
