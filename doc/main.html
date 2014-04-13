@@ -129,6 +129,7 @@ The demo data is within asset files. To write it to the printer (a Bluetooth soc
 [2] ensure we are connected<br>
 [3] we can also query the printer status asyncronously<br>
 [4] read the data as is means read it as ByteArrayInputStream<br>
+If the binary data is read as InputStream it is converted to unicode. But it has to remain as is and found I had to read it as ByteArrayInputStream to get unconverted data.<br>
 [5] open the stream using an asset file<br>
 [6] read and write the data in chunks<br>
 
@@ -194,6 +195,11 @@ The demo data is within asset files. To write it to the printer (a Bluetooth soc
 <li>TextView not scrolling if inside XYZ layout</li>
 <li>updating GUI from message handler works for some code and for other not</li>
 </ul>
+If you need an EditText to move automatically into view when the soft keyboard comes up, you need to wrap all your layout info a ScrollView.<br>
+First I did udates to the log TextView by TextView.append() inside the message handler. But the text was not updated all the time. Maybe if followed or after a Toast, but I changed the code to call a function to update the leg TextView.<br>
+Although a TextView shows scroll bars automatically, if in the right order of the layout and having a fixed height, scrolling stops working in some combinations and I finally added some hard code scrolling.<br>
 
+<h2>resume</h2>
+Although Android offers a great programming environment, some behaviour is strange and does not behave like documented. There was a lot of try-and-check before BtPrint4 behaved like desired. For example TextView scrolling, automatically and manually is a place of problems and trial and error, just search the internet about this and you will find many different 'solutions' that may work for you or not. It totally depends on your layout and the order of containers and which attributes they have.
 </body>
 </html>
