@@ -117,21 +117,54 @@ And the thread sending received data as a message:
 </pre>
 
 <h4>select a Bluetooth device</h4>
+You can enter a known BT MAC address directly of let the device show y ou a list of paired devices and scan for new devices. The BT device list activity is a separate activity and has to be added to the app Manifest. Such child activities communicate the selection back to the main activity using an onActivityResult handler funcion. Again, all child activities use the same handler function callback and so your list of switch/case codes increases. On windows (C#, .NET) you have one handler for one form or dialog.<br>
+In the original BluetoothChat code the Scan button was only visible on startup of the list activity and was hidden after a first press. I extended this to show the scan button all the time, so you can initiate another scan for devices without closing and opening the list again. During the scan (discovery) the button is changed to a cancel button which then stops the actula discovery.
 
 <h4>connect to device</h4>
+The connection is done async in a separate thread. We need a socket Bluetooth SPP connection:
+<pre>
+        public ConnectThread(BluetoothDevice device) {
+            mmDevice = device;
+            BluetoothSocket tmp = null;
+
+            // Get a BluetoothSocket for a connection with the
+            // given BluetoothDevice
+            try {
+                addText("createInsecureRfcommSocketToServiceRecord");
+                tmp = device.createInsecureRfcommSocketToServiceRecord(UUID_SPP);
+            } catch (IOException e) {
+                Log.e(TAG, "create() failed", e);
+            }
+            mmSocket = tmp;
+        }
+</pre>
+To identity a Bluetooth device we use the BT MAC address only.
 
 <h4>select a demo file</h4>
+The demo files are presented by another child activity. It lists the files ending in '.prn' of the assets dir. When you select a file, the content of the printdemo files xml is shown. This xml is read and fills creates a set of classes with the data of the xml for each demo file. The parsing and demo file classes are spread over three class files: <br>
+PrintFileDetails.java<br>
+PrintFileXML.java<br>
+PrintLanguage.java
+
+The details are the printer language, the media width, a short and a long description and the file name:
+<pre>    public String shortname;
+    public String description;
+    public String help;
+    public String filename;
+    public PrintLanguage.ePrintLanguages printLanguage;
+    public Integer printerWidth=2;
+</pre>
+The demo files have speaking names but these give not all details and so the xml is used to describe the files further. Example file name: escp4prodlist.prn (print language=ESP/P, media width=4 inch, prints a product list?) and the xml for that file is:
+<pre>	&lt;fileentry&gt;
+		&lt;shortname&gt;PrintESCP4plistBT&lt;/shortname&gt;
+		&lt;description&gt;Intermec (BT,ESCP,4inch) Product List Print&lt;/description&gt;
+		&lt;help&gt;Print 4inch product list to an Intermec printer in ESCP&lt;/help&gt;
+		&lt;filename&gt;escp4prodlist.prn&lt;/filename&gt;
+	&lt;/fileentry&gt;
+</pre>
 
 <h4>printing is sending binary data</h4>
 The demo data is within asset files. To write it to the printer (a Bluetooth socket) we need to obtain the bytes fo the file. We need to ensure the data is not changed and the data is send as is.
-
-[1] mTxtFilename holds the name of the file the user has selected<br>
-[2] ensure we are connected<br>
-[3] we can also query the printer status asyncronously<br>
-[4] read the data as is means read it as ByteArrayInputStream<br>
-If the binary data is read as InputStream it is converted to unicode. But it has to remain as is and found I had to read it as ByteArrayInputStream to get unconverted data.<br>
-[5] open the stream using an asset file<br>
-[6] read and write the data in chunks<br>
 
 <pre>
     void printFile() {
@@ -151,7 +184,7 @@ If the binary data is read as InputStream it is converted to unicode. But it has
             byte[] bufQuery = escpQuery();
             btPrintService.write(bufQuery);
         }
-        if (mTxtFilename.length() > 0) {
+        if (mTxtFilename.length() &gt; 0) {
             //TODO: add code
             InputStream inputStream = null;
             ByteArrayInputStream byteArrayInputStream; //[4]
@@ -164,7 +197,7 @@ If the binary data is read as InputStream it is converted to unicode. But it has
                 int readCount = 0;
                 do {
                     readCount = inputStream.read(buf);
-                    if (readCount > 0) {
+                    if (readCount &gt; 0) {
                         totalWrite += readCount;
                         byte[] bufOut = new byte[readCount];
                         System.arraycopy(buf, 0, bufOut, 0, readCount);
@@ -186,9 +219,17 @@ If the binary data is read as InputStream it is converted to unicode. But it has
         }
     }
 </pre>
+Notes for the above code:<br>
+[1] mTxtFilename holds the name of the file the user has selected<br>
+[2] ensure we are connected<br>
+[3] we can also query the printer status asyncronously<br>
+[4] read the data as is means read it as ByteArrayInputStream<br>
+If the binary data is read as InputStream it is converted to unicode. But it has to remain as is and found I had to read it as ByteArrayInputStream to get unconverted data.<br>
+[5] open the stream using an asset file<br>
+[6] read and write the data in chunks<br>
 
-
-<h2>anoyances</h2>
+<h2>annoyances</h2>
+Here is a short list of what drived me crazy and took a long trial and error phase.
 <ul>
 <li>EditText covered by soft keyboard if main layout is not a SrollView</li>
 <li>TextView not directly updated from inside message handler</li>
@@ -196,10 +237,10 @@ If the binary data is read as InputStream it is converted to unicode. But it has
 <li>updating GUI from message handler works for some code and for other not</li>
 </ul>
 If you need an EditText to move automatically into view when the soft keyboard comes up, you need to wrap all your layout info a ScrollView.<br>
-First I did udates to the log TextView by TextView.append() inside the message handler. But the text was not updated all the time. Maybe if followed or after a Toast, but I changed the code to call a function to update the leg TextView.<br>
+First I did udates to the log TextView by TextView.append() inside the message handler. But the text was not updated all the time. May be if before or after a Toast, but I changed the code to call a function to update the log TextView.<br>
 Although a TextView shows scroll bars automatically, if in the right order of the layout and having a fixed height, scrolling stops working in some combinations and I finally added some hard code scrolling.<br>
 
 <h2>resume</h2>
-Although Android offers a great programming environment, some behaviour is strange and does not behave like documented. There was a lot of try-and-check before BtPrint4 behaved like desired. For example TextView scrolling, automatically and manually is a place of problems and trial and error, just search the internet about this and you will find many different 'solutions' that may work for you or not. It totally depends on your layout and the order of containers and which attributes they have.
+Although Android offers a great programming environment, some behaviour is strange and does not behave like documented. Solving these problems took me 70% of the coding. There was a lot of try-and-check before BtPrint4 behaved like desired. For example TextView scrolling, automatically and manually is a place of problems and trial and error, just search the internet about this and you will find many different 'solutions' that may work for you or not. It totally depends on your layout and the order of containers and which attributes they have.
 </body>
 </html>
