@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebSettings;
 import android.widget.*;
 
@@ -94,6 +96,18 @@ public class BtPrint4 extends Activity {
 
         mRemoteDevice = (EditText) findViewById(R.id.remote_device);
         mRemoteDevice.setText(R.string.bt_default_address);
+        /* does not work to hide keypad
+        mRemoteDevice.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                //hide keyboard on lost focus
+                if(!hasFocus) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(mRemoteDevice.getWindowToken(), 0);
+                }
+            }
+        });
+        */
 
         //connect button
         mConnectButton = (Button) findViewById(R.id.buttonConnect);
@@ -564,9 +578,25 @@ public class BtPrint4 extends Activity {
             return;
         }
 
-        //Todo: format BT mac address
+        String sMacAddr = remote;
+        if (sMacAddr.contains(":") == false && sMacAddr.length() == 12)
+        {
+            // If the MAC address only contains hex digits without the
+            // ":" delimiter, then add ":" to the MAC address string.
+            char[] cAddr = new char[17];
 
-        String newRemote = remote;
+            for (int i=0, j=0; i < 12; i += 2)
+            {
+                sMacAddr.getChars(i, i+2, cAddr, j);
+                j += 2;
+                if (j < 17)
+                {
+                    cAddr[j++] = ':';
+                }
+            }
+
+            sMacAddr = new String(cAddr);
+        }
 /*
         //BT address is either 12 hex chars or
         //6 pairs of hex chars with colons in between
@@ -581,14 +611,14 @@ public class BtPrint4 extends Activity {
 */
         BluetoothDevice device;
         try {
-            device = mBluetoothAdapter.getRemoteDevice(newRemote);
+            device = mBluetoothAdapter.getRemoteDevice(sMacAddr);
         }catch (Exception e){
             myToast("Invalid BT MAC address");
             device=null;
         }
 
         if (device != null) {
-            addLog("connecting to " + newRemote);
+            addLog("connecting to " + sMacAddr);
             btPrintService.connect(device);
         } else {
             addLog("unknown remote device!");

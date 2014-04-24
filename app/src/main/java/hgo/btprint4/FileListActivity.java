@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,10 +39,13 @@ public class FileListActivity extends Activity {
         mFilesAdapter=new ArrayAdapter<String>(this, R.layout.file_name);
 
         // Find and set up the ListView for paired devices
-        ListView pairedListView = (ListView) findViewById(R.id.txtFileName);
+        ListView filesListView = (ListView) findViewById(R.id.txtFileName);
 
-        pairedListView.setAdapter(mFilesAdapter);
-        pairedListView.setOnItemClickListener(mFileClickListener);
+        // we register for the contextmneu
+        registerForContextMenu(filesListView);
+
+        filesListView.setAdapter(mFilesAdapter);
+        filesListView.setOnItemClickListener(mFileClickListener);
         getFiles();
         addLog("+++OnCreate+++ DONE");
     }
@@ -66,6 +70,25 @@ public class FileListActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    // We want to create a context Menu when the user long click on an item
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+
+        super.onCreateContextMenu(menu, v, menuInfo);
+        AdapterView.AdapterContextMenuInfo aInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+
+        // We know that each row in the adapter is a Map
+        //HashMap map =  (HashMap) simpleAdpt.getItem(aInfo.position);
+
+        //menu.setHeaderTitle("Options for " + map.get("planet"));
+        menu.add(1, 1, 1, "Details");
+        menu.add(1, 2, 2, "Delete");
+
+    }
+    //- See more at: http://www.survivingwithandroid.com/2012/09/listviewpart-1.html#sthash.PpsRem7j.dpuf
+
     @Override
     protected void onDestroy(){
         super.onDestroy();
