@@ -40,4 +40,7 @@ public class PrintFileDetails {
                 this.filename);
         return s;
     }
+    public String getName(){
+        return this.filename;
+    }
 }
