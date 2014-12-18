@@ -89,6 +89,13 @@
             android:drawableLeft="@drawable/paper" />
 
         <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_txt_select_file"
+            android:id="@+id/btn_BrowseForFile"
+            android:layout_weight="0.5" />
+
+        <Button
             android:layout_width="@dimen/button_width"
             android:layout_height="wrap_content"
             android:text="@string/button_print_text"
@@ -98,6 +105,7 @@
             android:layout_weight="0.5"
             android:drawableLeft="@drawable/pb42"
             />
+
     </LinearLayout>
 
     <TextView

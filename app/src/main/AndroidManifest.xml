@@ -23,17 +23,27 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="hgo.btprint4.DeviceListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/select_device"
             android:theme="@android:style/Theme.Dialog" />
+<!--list demo file picker -->
         <activity
             android:name=".FileListActivity"
-            android:label="@string/title_activity_file_list" >
             android:label="@string/select_file"
             android:theme="@android:style/Theme.Dialog" />
-        </activity>
+
+        <!--browse for file picker -->
+        <activity android:name=".FileexplorerActivity"
+            android:label="File Browser"
+            android:theme="@android:style/Theme.Dialog" />
+        <activity
+            android:name=".FileChooser"
+            android:label="@string/select_file"
+            android:theme="@android:style/Theme.Dialog" />
+
     </application>
 
 </manifest>

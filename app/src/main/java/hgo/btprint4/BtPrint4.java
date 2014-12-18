@@ -1,16 +1,12 @@
 package hgo.btprint4;
 
 import android.app.Activity;
-import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -21,19 +17,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebSettings;
 import android.widget.*;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -51,6 +40,7 @@ public class BtPrint4 extends Activity {
     TextView mLog = null;
     Button mBtnExit = null;
     Button mBtnScan = null;
+    Button mBtnBrowseForFile = null;
 
     Button mBtnSelectFile;
     TextView mTxtFilename;
@@ -149,11 +139,21 @@ public class BtPrint4 extends Activity {
             }
         });
 
+        //select demo file button
         mBtnSelectFile = (Button) findViewById(R.id.btnSelectFile);
         mBtnSelectFile.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 startFileList();
+            }
+        });
+
+        //browse for file button
+        mBtnBrowseForFile=(Button)findViewById(R.id.btn_BrowseForFile);
+        mBtnBrowseForFile.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startFileBrowser();
             }
         });
 
@@ -412,6 +412,16 @@ public class BtPrint4 extends Activity {
         // Launch the DeviceListActivity to see devices and do scan
         Intent serverIntent = new Intent(this, DeviceListActivity.class);
         startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+    }
+
+    boolean bFileBrowserStarted=false;
+    void startFileBrowser(){
+        if(bFileBrowserStarted)
+            return;
+        bFileBrowserStarted=true;
+        Intent fileBrowserIntent = new Intent(this, FileexplorerActivity.class);
+        //Intent fileBrowserIntent = new Intent(this, FileBrowserActivity.class);
+        startActivityForResult(fileBrowserIntent, REQUEST_SELECT_FILE);
     }
 
     boolean bFileListStared = false;

@@ -94,7 +94,7 @@ public class FileListActivity extends Activity {
         super.onDestroy();
         addLog("+++OnDestroy+++");
     }
-    // The on-click listener for all devices in the ListViews
+    // The on-click listener for all items in the ListViews
     private AdapterView.OnItemClickListener mFileClickListener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
             addLog("OnItemClickListener()");

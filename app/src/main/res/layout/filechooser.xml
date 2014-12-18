@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <TextView android:id="@+id/textview"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Get File Name"
+        android:textSize="18dp"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        />
+    <RelativeLayout android:id="@+id/relativeLayout1"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content">
+        <EditText
+            android:layout_alignParentLeft="true"
+            android:hint="EditText"
+            android:id="@+id/editText"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="15dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:layout_toLeftOf="@+id/skipButton" >
+        </EditText>
+
+        <Button android:text="Browser"
+            android:id="@+id/skipButton"
+            android:textSize="18dp"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentRight="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:onClick="getfile" >
+        </Button>
+    </RelativeLayout>
+</LinearLayout>
