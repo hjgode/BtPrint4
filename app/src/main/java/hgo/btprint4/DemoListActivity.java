@@ -2,7 +2,6 @@ package hgo.btprint4;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -15,9 +14,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 
-public class FileListActivity extends Activity {
+public class DemoListActivity extends Activity {
     // Debugging
-    private static final String TAG = "FileListActivity";
+    private static final String TAG = "DemoListActivity";
     private static final boolean D = true;
 
     // Return Intent extra
@@ -30,16 +29,16 @@ public class FileListActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.file_list);
+        setContentView(R.layout.demo_list);
         mAssetFiles=new AssetFiles(this);
         // Set result CANCELED in case the user backs out
         setResult(Activity.RESULT_CANCELED);
 
         //bind TextView to string
-        mFilesAdapter=new ArrayAdapter<String>(this, R.layout.file_name);
+        mFilesAdapter=new ArrayAdapter<String>(this, R.layout.demo_filename);
 
         // Find and set up the ListView for paired devices
-        ListView filesListView = (ListView) findViewById(R.id.txtFileName);
+        ListView filesListView = (ListView) findViewById(R.id.ListViewFileName);
 
         // we register for the contextmneu
         registerForContextMenu(filesListView);

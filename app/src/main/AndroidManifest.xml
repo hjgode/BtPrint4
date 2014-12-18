@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <uses-sdk android:minSdkVersion="10" />
 
@@ -11,7 +12,8 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        >
         <activity
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:name="hgo.btprint4.BtPrint4"
@@ -31,14 +33,11 @@
             android:theme="@android:style/Theme.Dialog" />
 <!--list demo file picker -->
         <activity
-            android:name=".FileListActivity"
+            android:name=".DemoListActivity"
             android:label="@string/select_file"
             android:theme="@android:style/Theme.Dialog" />
 
         <!--browse for file picker -->
-        <activity android:name=".FileexplorerActivity"
-            android:label="File Browser"
-            android:theme="@android:style/Theme.Dialog" />
         <activity
             android:name=".FileChooser"
             android:label="@string/select_file"

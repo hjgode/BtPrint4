@@ -21,6 +21,7 @@ import android.view.View.OnClickListener;
 import android.widget.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -57,8 +58,10 @@ public class BtPrint4 extends Activity {
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
 
-    // Intent request codes for files list
-    private static final int REQUEST_SELECT_FILE = 3;
+    // Intent request codes for demo files list
+    private static final int REQUEST_SELECT_DEMO_FILE = 3;
+    // Intent request codes for file browser
+    private static final int REQUEST_SELECT_FILE = 4;
 
     BluetoothAdapter mBluetoothAdapter = null;
 
@@ -157,7 +160,7 @@ public class BtPrint4 extends Activity {
             }
         });
 
-        mTxtFilename = (TextView) findViewById(R.id.txtFileName);
+        mTxtFilename=(TextView)findViewById(R.id.txtFileName);
         mTxtFilename.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -273,16 +276,17 @@ public class BtPrint4 extends Activity {
      */
     void printFile() {
         String fileName = mTxtFilename.getText().toString();
-        if (!fileName.endsWith("prn")) {
-            myToast("Not a prn file!", "Error");
-            return; //does not match file pattern for a print file
-        }
+//        if (!fileName.endsWith("prn")) {
+//            myToast("Not a prn file!", "Error");
+//            return; //does not match file pattern for a print file
+//        }
         if (btPrintService.getState() != btPrintFile.STATE_CONNECTED) {
             myToast("Please connect first!", "Error");
             //PROBLEM: this Toast does not work!
             //Toast.makeText(this, "please connect first",Toast.LENGTH_LONG);
             return; //does not match file pattern for a print file
         }
+
         //do a query if escp
         if (fileName.startsWith("escp")) {
             byte[] bufQuery = escpQuery();
@@ -295,7 +299,15 @@ public class BtPrint4 extends Activity {
             Integer totalWrite = 0;
             StringBuffer sb = new StringBuffer();
             try {
-                inputStream = this.getAssets().open(fileName);
+                //TODO: test if this is a storage file or a Assets resource file?
+                if(fileName.startsWith("/")){
+                    inputStream = new FileInputStream(fileName);
+                    addLog("Using regular file: '"+fileName+"'");
+                }
+                else {
+                    inputStream = this.getAssets().open(fileName);
+                    addLog("Using demo file: '"+fileName+"'");
+                }
 
                 byte[] buf = new byte[2048];
                 int readCount = 0;
@@ -404,7 +416,6 @@ public class BtPrint4 extends Activity {
     }
 
     boolean bDiscoveryStarted = false;
-
     void startDiscovery() {
         if (bDiscoveryStarted)
             return;
@@ -419,19 +430,20 @@ public class BtPrint4 extends Activity {
         if(bFileBrowserStarted)
             return;
         bFileBrowserStarted=true;
-        Intent fileBrowserIntent = new Intent(this, FileexplorerActivity.class);
-        //Intent fileBrowserIntent = new Intent(this, FileBrowserActivity.class);
-        startActivityForResult(fileBrowserIntent, REQUEST_SELECT_FILE);
+//        Intent fileBrowserIntent = new Intent(this, FileexplorerActivity.class);
+//        //Intent fileBrowserIntent = new Intent(this, FileBrowserActivity.class);
+//        startActivityForResult(fileBrowserIntent, REQUEST_SELECT_DEMO_FILE);
+        Intent intent1 = new Intent(this, FileChooser.class);
+        startActivityForResult(intent1, REQUEST_SELECT_FILE);
     }
 
     boolean bFileListStared = false;
-
     void startFileList() {
         if (bFileListStared)
             return;
         bFileListStared = true;
-        Intent fileListerIntent = new Intent(this, FileListActivity.class);
-        startActivityForResult(fileListerIntent, REQUEST_SELECT_FILE);
+        Intent fileListerIntent = new Intent(this, DemoListActivity.class);
+        startActivityForResult(fileListerIntent, REQUEST_SELECT_DEMO_FILE);
     }
 
     @Override
@@ -650,12 +662,25 @@ public class BtPrint4 extends Activity {
         if (D) Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
             case REQUEST_SELECT_FILE:
-                addLog("onActivityResult: requestCode==REQUEST_SELECT_FILE");
+                if (resultCode == RESULT_OK) {
+                    String curFileName = data.getStringExtra("GetFileName");
+                    String curPath = data.getStringExtra("GetPath");
+                    if(!curPath.endsWith("/")) {
+                        curPath += "/";
+                    }
+                    String fullName=curPath+curFileName;
+                    mTxtFilename.setText(fullName);
+                    addLog("Filebrowser Result_OK: '"+fullName+"'");
+                }
+                bFileBrowserStarted=false;
+                break;
+            case REQUEST_SELECT_DEMO_FILE:
+                addLog("onActivityResult: requestCode==REQUEST_SELECT_DEMO_FILE");
                 // When DeviceListActivity returns with a device to connect
                 if (resultCode == Activity.RESULT_OK) {
                     addLog("resultCode==OK");
                     // Get the device MAC address
-                    String file = data.getExtras().getString(FileListActivity.EXTRA_FILE_NAME);
+                    String file = data.getExtras().getString(DemoListActivity.EXTRA_FILE_NAME);
                     addLog("onActivityResult: got file=" + file);
                     if (printFileXML != null) {
                         PrintFileDetails details = printFileXML.getPrintFileDetails(file);

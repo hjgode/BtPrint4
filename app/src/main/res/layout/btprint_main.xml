@@ -64,10 +64,12 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="tap [select demo]"
         android:id="@+id/txtFileName"
-        android:maxLines="1"
+        android:maxLines="2"
         android:background="@android:color/white"
         android:paddingTop="4dp"
-        android:paddingBottom="4dp" />
+        android:paddingBottom="4dp"
+        android:layout_gravity="top"
+        android:gravity="top" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -80,12 +82,11 @@
         >
 
         <Button
-            android:layout_width="@dimen/button_width"
+            android:layout_width="137dp"
             android:layout_height="wrap_content"
             android:text="@string/button_select_file_text"
             android:id="@+id/btnSelectFile"
             android:minWidth="180dp"
-            android:layout_weight="0.5"
             android:drawableLeft="@drawable/paper" />
 
         <Button

@@ -23,7 +23,7 @@
     <string name="select_file">select file</string>
     <string name="filelistmenu">demo files</string>
     <string name="button_print_text">PRINT</string>
-    <string name="button_select_file_text">select demo</string>
+    <string name="button_select_file_text">demo</string>
     <string name="button_connect_text">connect</string>
     <string name="button_disconnect_text">disconnect</string>
     <string name="toast_title">Information</string>
