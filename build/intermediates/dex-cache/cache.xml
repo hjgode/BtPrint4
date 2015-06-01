@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pre-dex-items>
+
+    <item
+        dex="D:\svn\BtPrint4\app\build\intermediates\pre-dexed\release\support-v4-19.1.0-2e116a2f2ffa865698308aaa39a156ac2f3e60ad.jar"
+        jar="C:\android-studio\sdk\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+    <item
+        dex="D:\svn\BtPrint4\app\build\intermediates\pre-dexed\release\classes-a208af67a7f669ef31f4d447820902c4f2ace530.jar"
+        jar="D:\svn\BtPrint4\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
+
+</pre-dex-items>
