@@ -3,30 +3,39 @@
 
     <item
         is-multidex="true"
-        jar="D:\svn\BtPrint4\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\jars\classes.jar"
+        jar="C:\Users\E841719\.android\build-cache\ce24b6d54ed6f124c3c80b162ca326f1896d7a64\output\jars\classes.jar"
         jumboMode="true"
         optimize="true"
-        revision="22.0.1"
+        revision="25.0.0"
         sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28">
-        <dex dex="D:\svn\BtPrint4\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-appcompat-v7-19.1.0_345212bff4396a62168ad48f1fb28eabf7913f68\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="D:\svn\BtPrint4\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="22.0.1"
-        sha1="3329e17f60db33ce4c582157bbfc82623bd2b0a3">
-        <dex dex="D:\svn\BtPrint4\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_5a6b43f3017aaa752d8b7cf6d472d797fdc8486f\classes.dex" />
+        <dex dex="D:\svn\BtPrint4\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_90662e550d5ff5fa22a3fbaa5de2a5d6a9482b6f\classes.dex" />
     </item>
     <item
         is-multidex="true"
         jar="D:\svn\BtPrint4\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
         jumboMode="true"
         optimize="true"
-        revision="22.0.1"
-        sha1="5be88d0790ff68e2bf1f5e3085da0695f0012bad">
-        <dex dex="D:\svn\BtPrint4\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_c047b828627a1b38f7b19a874acfde350e198d91\classes.dex" />
+        revision="25.0.0"
+        sha1="5faaf888b6a442bcdf8af7a36e0a660644ab1b2f">
+        <dex dex="D:\svn\BtPrint4\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_c047b828627a1b38f7b19a874acfde350e198d91\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\android-sdk\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67">
+        <dex dex="D:\svn\BtPrint4\app\build\intermediates\transforms\dex\debug\folders\1000\10\support-v4-19.1.0_a22c0f82dd3cd2e296e0f724b466cb05c2a80ae8\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="D:\svn\BtPrint4\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="caff8e51a24901cfc9cd7e1cf83d84f4cb0c103b">
+        <dex dex="D:\svn\BtPrint4\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run_5a6b43f3017aaa752d8b7cf6d472d797fdc8486f\classes.dex" />
     </item>
     <item
         is-multidex="true"

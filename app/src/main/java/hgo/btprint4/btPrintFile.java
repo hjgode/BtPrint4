@@ -31,7 +31,7 @@ public class btPrintFile {
         addText("btPrintFile initialized 1");
     }
 
-    // init a new btPrint with a conext for callbacks
+    // init a new btPrint with a context for callbacks
     // the BT MAC as string and the file to be printed
     public btPrintFile(Handler handler, String sBTmac, String sFileName)
     {

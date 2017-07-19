@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <files>
 	<fileentry>
+	<shortname>ESCP_EZ_PR3_CHINESE</shortname>
+	<description>Intermec PR3 (BT,EZ,3inch) Chinese Test Print (Arial Uni MS installed as ARIAL)</description>
+	<help>Print 2inch list to an Intermec printer in ESCP</help>
+	<filename>escpEZchineseP3.prn</filename>
+	</fileentry>
+	<fileentry>
 		<shortname>PrintESC2plistBT</shortname>
 		<description>Intermec (BT,ESCP,2inch) Product List Print</description>
 		<help>Print 2inch list to an Intermec printer in ESCP</help>
