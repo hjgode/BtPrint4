@@ -8,7 +8,8 @@ import java.util.List;
 import java.text.DateFormat; 
 import android.os.Bundle; 
 import android.app.ListActivity;
-import android.content.Intent; 
+import android.content.Intent;
+import android.os.Environment;
 import android.view.View;
 import android.widget.ListView; 
 
@@ -19,7 +20,7 @@ public class FileChooser extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState); 
-        currentDir = new File("/");
+        currentDir = new File(Environment.getExternalStorageDirectory().getPath());//"/");
         fill(currentDir); 
     }
     private void fill(File f)
@@ -74,8 +75,15 @@ public class FileChooser extends ListActivity {
 		super.onListItemClick(l, v, position, id);
 		Item o = adapter.getItem(position);
 		if(o.getImage().equalsIgnoreCase("directory_icon")||o.getImage().equalsIgnoreCase("directory_up")){
+			try {
+				if(o.getPath()==null)
+					return;
 				currentDir = new File(o.getPath());
 				fill(currentDir);
+			}catch (NullPointerException ex){
+				currentDir= Environment.getExternalStorageDirectory();
+				fill(currentDir);
+			}
 		}
 		else
 		{

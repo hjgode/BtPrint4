@@ -1,0 +1,8 @@
+@EZ
+{PRINT:
+@80,50:PB203,HMULT2, VMULT2|123testPB203|
+@150,50:PM107|*丂丅丳並乧乫*|
+@230,50:ARIAL|+㭂㭅㬰+|
+@310,50:UNIVB|Needs Arial Unicode MS installed as ARIAL|
+}
+{LP}

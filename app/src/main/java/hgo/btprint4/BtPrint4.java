@@ -272,6 +272,13 @@ public class BtPrint4 extends Activity {
         return buf2.array();
     }
 
+    byte[] fpQuery() {
+        String sBuf = "?SYSHEALTH$\n";
+        ByteBuffer buf2;
+        Charset charset = Charset.forName("UTF-8");
+        buf2 = charset.encode(sBuf);
+        return buf2.array();
+    }
     /**
      * this will print a file to the printer
      */
@@ -293,6 +300,18 @@ public class BtPrint4 extends Activity {
             byte[] bufQuery = escpQuery();
             btPrintService.write(bufQuery);
         }
+        //do another query if FP
+        if (fileName.startsWith("fp")) {
+            byte[] bufQuery = fpQuery();
+            btPrintService.write(bufQuery);
+            /*
+            //possible answers to ?SYSHEALTH$
+            mError.put(400, "Operational" );
+            mError.put(401, "Out of paper" );
+            mError.put(402, "Door open" );
+            */
+        }
+
         if (mTxtFilename.length() > 0) {
             //TODO: add code
             InputStream inputStream = null;
@@ -477,7 +496,7 @@ public class BtPrint4 extends Activity {
 
     private void setupComm() {
         // Initialize the array adapter for the conversation thread
-        mConversationArrayAdapter = new ArrayAdapter<String>(this, R.id.remote_device);
+        mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
         Log.d(TAG, "setupComm()");
         btPrintService = new btPrintFile(this, mHandler);
         if (btPrintService == null)
