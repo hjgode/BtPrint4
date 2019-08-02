@@ -1,12 +1,16 @@
 package hgo.btprint4;
 
+import android.Manifest;
 import android.app.Activity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.method.ScrollingMovementMethod;
@@ -21,15 +25,23 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.*;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
-public class BtPrint4 extends Activity {
+public class BtPrint4 extends Activity  {
+
     btPrintFile btPrintService = null;
     // Layout Views
 //    private TextView mTitle;
@@ -38,6 +50,13 @@ public class BtPrint4 extends Activity {
     // Debugging
     private static final String TAG = "btprint";
     private static final boolean D = true;
+
+    Context m_context=null;
+    Activity thisActivity=null;
+    private static final int REQUEST_WRITE = 112;
+    private static final int REQUEST_BTADMIN = 113;
+    private static final int REQUEST_BT = 114;
+    private static final int REQUEST_LOCATION = 115;
 
     TextView mLog = null;
     Button mBtnExit = null;
@@ -73,6 +92,10 @@ public class BtPrint4 extends Activity {
         //show
         super.onCreate(savedInstanceState);
         setContentView(R.layout.btprint_main);
+
+        m_context=this.getApplicationContext();
+        thisActivity=BtPrint4.this;
+        checkPermissions();
 
         // CRASHES!
 //        // Set up the window layout
@@ -783,5 +806,109 @@ public class BtPrint4 extends Activity {
         }
     }
 
+    void test(){
+        boolean bFileOK=false;
+//        Port.Write(new byte[]{27,119, 37}, 0, 3); //select font with 37, 0x25, '%'
+//        Port.Write(new byte[]{27,72, 2}, 0, 3);   //multiply Font height by 2
+        byte[] printing = new byte[]{
+                27,119,37,
+                27,72,2,
+            32,32,13,10,32,32,13,10,32,32,13,10,32,32,13,10,32,32,13,10,32,32,13,10,32,32,13,10,32,32,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,77,117,100,101,105,98,32,72,97,100,100,97,100,32,38,32,83,111,110,115,32,67,111,46,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,-31,-88,-54,-24,-47,-55,32,-42,-47,-22,-56,-22,-55,32,-57,-63,-88,-49,-55,32,-41,-56,-88,-63,-55,13,10,32,32,50,48,49,56,45,49,49,45,48,53,32,49,49,58,49,56,58,51,52,58,-54,-88,-47,-22,-81,32,-57,-28,-31,-88,-54,-24,-47,-55,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,73,78,86,45,50,50,52,48,45,48,48,48,48,48,52,58,-47,-30,-17,32,-57,-28,-31,-88,-54,-24,-47,-55,13,10,32,32,50,48,49,56,45,49,49,45,48,53,32,49,49,58,49,56,58,51,52,58,-54,-88,-47,-22,-81,32,-57,-28,-54,-24,-43,-22,-5,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,-57,-28,-27,-44,-51,-24,-70,32,-57,-28,-54,-52,-88,-47,-22,-55,58,-57,-28,-63,-27,-22,-5,13,10,32,32,49,55,50,56,57,56,58,-47,-27,-46,32,-57,-28,-63,-27,-22,-5,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,-63,-27,-88,-14,58,-63,-26,-24,-57,-14,32,-57,-28,-63,-27,-22,-5,13,10,32,32,58,-47,46,-41,46,-67,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,58,-57,-28,-47,-30,-17,32,-57,-28,-42,-47,-22,-56,-10,32,-28,-28,-63,-27,-22,-5,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,-26,-40,-27,-10,32,-57,-51,-27,-49,58,-57,-45,-17,32,-57,-28,-27,-26,-49,-24,-87,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,58,84,101,109,112,101,114,97,116,117,114,101,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,58,72,117,109,105,100,105,116,121,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,58,83,104,111,99,107,13,10,32,32,13,10,32,32,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,13,10,32,32,32,32,-57,-28,-30,-22,-27,-55,32,-56,-63,-49,32,32,32,32,32,-26,-45,-56,-55,32,32,32,-57,-28,-50,-43,-17,32,32,32,-57,-28,-45,-63,-47,32,32,-57,-28,-29,-27,-22,-55,32,32,32,32,-57,-28,-47,-27,-46,32,32,32,32,32,32,32,32,32,32,32,-24,-43,-70,32,-57,-28,-27,-88,-49,-13,13,10,32,32,32,32,32,32,32,-57,-28,-42,-47,-22,-56,-55,32,32,-57,-28,-42,-47,-22,-56,-55,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,13,10,32,32,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,-57,-28,-27,-56,-22,-63,-88,-86,13,10,32,32,32,32,32,32,32,32,49,57,46,49,50,54,32,32,32,32,32,49,54,32,37,32,32,32,49,46,56,51,50,32,32,32,57,46,49,54,48,32,32,50,46,48,48,48,48,32,32,32,88,80,70,53,49,49,32,32,32,32,32,32,32,-56,-41,-88,-41,-88,32,32,-56,-88,-28,-31,-28,-31,-5,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,-17,-32,-38,32,55,56,32,32,-47,-22,-56,-29,32,-47,-88,-51,-28,-57,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,50,48,32,-55,-56,-51,45,67,65,82,84,79,78,13,10,32,32,32,32,32,32,32,45,45,45,45,45,45,45,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,45,45,45,45,45,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,13,10,32,32,32,32,32,32,32,32,49,57,46,49,50,54,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,50,46,48,48,48,48,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,-57,-28,-27,-52,-27,-24,-63,13,10,13,10,32,32,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,49,56,46,51,50,48,32,32,32,32,32,58,32,32,32,32,32,32,32,32,-10,-28,-29,-28,-57,32,-63,-24,-27,-52,-27,-28,-57,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,49,46,56,51,50,32,32,32,32,32,32,58,32,32,32,32,32,32,32,-86,-88,-27,-24,-43,-50,-28,-57,32,-63,-24,-27,-52,-27,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,48,46,48,48,48,32,32,32,32,32,32,58,32,32,32,32,32,32,32,32,-21,-24,-47,-63,-28,-57,32,-86,-88,-27,-24,-43,-50,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,50,46,54,51,56,32,32,32,32,32,32,58,32,32,32,32,32,32,32,32,32,-55,-56,-22,-47,-42,-28,-57,32,-55,-27,-22,-30,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,49,57,46,49,50,54,32,32,32,32,32,58,32,32,32,32,32,32,32,32,32,32,-55,-27,-22,-30,-28,-57,32,-10,-31,-88,-43,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,-44,-29,-47,-57,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,32,32,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,32,32,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,-57,-28,-27,-44,-47,-70,32,32,32,32,32,32,32,32,32,32,32,32,-57,-28,-63,-27,-22,-5,32,32,32,32,32,32,32,32,32,32,32,-27,-49,-22,-47,32,-57,-28,-27,-56,-22,-63,-88,-86,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,-28,-54,-31,-88,-49,-3,32,-54,-28,-70,32,-25,-48,-13,32,-57,-28,-24,-47,-30,-55,32,-22,-52,-87,32,-57,-14,32,-54,-24,-42,-63,32,-54,-51,-86,32,-51,-47,-57,-47,-55,32,49,53,32,-49,-47,-52,-55,32,-27,-58,-24,-22,-55,13,10,32,13,10,32,13,10,32,13,10,32,13,10,32,13,10,32,13,10 };
+        StringBuilder sb = new StringBuilder(printing.length * 5);
+        for(byte b:printing){
+            sb.append(String.format("0x%02x,", b));
+        }
+        System.out.println( sb.toString() );
+
+        File root = Environment.getExternalStorageDirectory();
+        FileOutputStream f=null;
+        try {
+            f = new FileOutputStream(new File(root, "arabic_pc864.prn"));
+        }catch(FileNotFoundException ex){
+            Toast.makeText(m_context, "Exception in getExternalStorage: "+ex.getMessage(), Toast.LENGTH_LONG );
+            Log.e(TAG, "Exception in getExternalStorage: "+ex.getMessage());
+        }
+        try{
+            f.write(printing,0,printing.length);
+            f.flush();
+            f.close();
+            bFileOK=true;
+        }catch(IOException ex){
+            Toast.makeText(m_context, "Exception in f.write(): "+ex.getMessage(), Toast.LENGTH_LONG );
+            Log.e(TAG, "Exception in f.write(): "+ex.getMessage());
+        }
+
+        if(bFileOK){
+            try {
+                //////////////////ENCODING CONVERT
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(root + "/arabic_pc864.prn"), "cp864"));
+                StringBuilder total = new StringBuilder();
+                for (String line; (line = reader.readLine()) != null; ) {
+                    total.append(line).append("\r\n");
+                }
+                //write as windows-1256
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(root+ "/arabic_pc864_cp1256.prn"), "windows-1256"));
+                writer.write(total.toString());
+                writer.flush();
+                writer.close();
+            }catch(IOException ex){
+
+            }
+        }
+    }
+    void checkPermissions(){
+        if (    m_context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                m_context.checkSelfPermission(Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
+                m_context.checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED ||
+                m_context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            requestPermissions(new String[]{
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                    Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_WRITE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQUEST_WRITE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG, "Permission granted: WRITE_EXTERNAL_STORAGE");
+                    //do here
+                    test(); //just a test byte array
+
+                } else {
+                    Toast.makeText(m_context, "The app was not allowed to write in your storage", Toast.LENGTH_LONG).show();
+                }
+            }
+            case REQUEST_BT: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //do here
+                    Log.i(TAG, "Permission granted: BLUETOOTH");
+                } else {
+                    Toast.makeText(m_context, "The app was not allowed to use Bluetooth", Toast.LENGTH_LONG).show();
+                }
+            }
+            case REQUEST_BTADMIN: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //do here
+                    Log.i(TAG, "Permission granted: BLUETOOTH_ADMIN");
+                } else {
+                    Toast.makeText(m_context, "The app was not allowed to manage Bluetooth", Toast.LENGTH_LONG).show();
+                }
+            }
+            case REQUEST_LOCATION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //do here
+                    Log.i(TAG, "Permission granted: ACCESS_COARSE_LOCATION");
+                } else {
+                    Toast.makeText(m_context, "The app was not allowed to use Coarse Location", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
 
 }

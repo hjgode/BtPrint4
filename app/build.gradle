@@ -1,25 +1,26 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '26.0.2'
-
+    compileSdkVersion 26
+    buildToolsVersion '28.0.3'
     defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 19
+        minSdkVersion 23
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
-    }
 
+    }
     buildTypes {
         release {
             //runProguard false
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    productFlavors {
+    }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:19.+'
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:26.+'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
 }
